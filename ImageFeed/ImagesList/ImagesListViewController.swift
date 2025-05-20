@@ -1,0 +1,50 @@
+//
+//  ViewController.swift
+//  ImageFeed
+//
+//  Created by Muhammed Nurmukhanov on 18.05.2025.
+//
+
+import UIKit
+
+final class ImagesListViewController: UIViewController {
+
+    @IBOutlet private var tableView: UITableView!
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        tableView.rowHeight = 200
+        // Do any additional setup after loading the view.
+    }
+    
+}
+
+extension ImagesListViewController: UITableViewDataSource {
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 1
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: ImagesListCell.reusedIdentifier, for: indexPath)
+        
+        guard let imageListCell = cell as? ImagesListCell else {
+            return UITableViewCell()
+        }
+        
+        configCell(for: imageListCell)
+        
+        return imageListCell
+    }
+}
+
+extension ImagesListViewController {
+    func configCell(for cell: ImagesListCell) { }
+}
+
+extension ImagesListViewController: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+    }
+}
