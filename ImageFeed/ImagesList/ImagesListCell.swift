@@ -8,5 +8,13 @@
 import UIKit
 
 final class ImagesListCell: UITableViewCell {
-    static let reusedIdentifier = "ImageListCell"
+    
+    @IBOutlet weak var imageOfPost: UIImageView!
+    
+    @IBOutlet weak var dateLabel: UILabel!
+    
+    
+    @IBOutlet weak var likeButton: UIButton!
+    
+    static let reusedIdentifier = "ImagesListCell"
 }
