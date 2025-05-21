@@ -18,7 +18,6 @@ final class ImagesListViewController: UIViewController {
         
         tableView.rowHeight = 200
         tableView.contentInset = UIEdgeInsets(top: 12, left: 0, bottom: 12, right: 0)
-        // Do any additional setup after loading the view.
     }
     
     private lazy var dateFormatter: DateFormatter = {
@@ -50,7 +49,7 @@ extension ImagesListViewController: UITableViewDataSource {
 }
 
 extension ImagesListViewController {
-    func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
+    private func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
         
         let nameOfImage = photosName[indexPath.row]
         
@@ -63,9 +62,9 @@ extension ImagesListViewController {
         
         cell.dateLabel.text = dateFormatter.string(from: Date())
         
-        indexPath.row % 2 == 0 ? cell.likeButton.setImage(UIImage(named: "like_button_on"), for: .normal): cell.likeButton.setImage(UIImage(named: "like_button_off"), for: .normal)
-        
-        
+        indexPath.row % 2 == 0
+        ? cell.likeButton.setImage(UIImage(named: "like_button_on"), for: .normal)
+        : cell.likeButton.setImage(UIImage(named: "like_button_off"), for: .normal)
     }
 }
 
