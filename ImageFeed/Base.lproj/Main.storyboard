@@ -21,7 +21,7 @@
                                 <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                                 <color key="backgroundColor" red="0.10196078431372549" green="0.10588235294117647" blue="0.13333333333333333" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                                 <prototypes>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationWidth="10" reuseIdentifier="ImagesListCell" rowHeight="179" id="gq7-bf-yZJ" customClass="ImagesListCell" customModule="ImageFeed" customModuleProvider="target">
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationWidth="10" reuseIdentifier="ImagesListCell" rowHeight="179" id="gq7-bf-yZJ" customClass="ImagesListCell" customModule="ImageFeed" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="50" width="393" height="179"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="gq7-bf-yZJ" id="wm5-q9-7EU">
@@ -38,6 +38,10 @@
                                                         <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
                                                     </userDefinedRuntimeAttributes>
                                                 </imageView>
+                                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="pvk-na-bHI" userLabel="Gradient View">
+                                                    <rect key="frame" x="16" y="147.66666666666666" width="377" height="27.333333333333343"/>
+                                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                </view>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="27 августа 2022" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QMh-p5-0qL" userLabel="Date Label">
                                                     <rect key="frame" x="24.000000000000007" y="151.66666666666666" width="101.66666666666669" height="15.333333333333343"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="13"/>
@@ -59,9 +63,13 @@
                                                 <constraint firstItem="QMh-p5-0qL" firstAttribute="leading" secondItem="F1p-42-ZG5" secondAttribute="leading" constant="8" id="14n-wV-hwD"/>
                                                 <constraint firstItem="F1p-42-ZG5" firstAttribute="leading" secondItem="wm5-q9-7EU" secondAttribute="leading" constant="16" id="613-Iu-G0g"/>
                                                 <constraint firstItem="F1p-42-ZG5" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="QMh-p5-0qL" secondAttribute="trailing" constant="8" id="A81-ic-CWq"/>
+                                                <constraint firstItem="QMh-p5-0qL" firstAttribute="top" secondItem="pvk-na-bHI" secondAttribute="top" constant="4" id="C4P-lw-2Qw"/>
+                                                <constraint firstItem="pvk-na-bHI" firstAttribute="leading" secondItem="F1p-42-ZG5" secondAttribute="leading" id="JmR-vf-Npx"/>
                                                 <constraint firstAttribute="bottom" secondItem="F1p-42-ZG5" secondAttribute="bottom" constant="4" id="LxQ-6t-eIy"/>
+                                                <constraint firstItem="pvk-na-bHI" firstAttribute="trailing" secondItem="wm5-q9-7EU" secondAttribute="trailing" id="TEc-Bq-dLE"/>
                                                 <constraint firstItem="F1p-42-ZG5" firstAttribute="bottom" secondItem="QMh-p5-0qL" secondAttribute="bottom" constant="8" id="Wde-QA-QQC"/>
                                                 <constraint firstAttribute="trailing" secondItem="F1p-42-ZG5" secondAttribute="trailing" constant="16" id="bLB-y6-C5r"/>
+                                                <constraint firstItem="pvk-na-bHI" firstAttribute="bottom" secondItem="F1p-42-ZG5" secondAttribute="bottom" id="egT-dg-tvr"/>
                                                 <constraint firstItem="F1p-42-ZG5" firstAttribute="trailing" secondItem="Muu-Wo-wE9" secondAttribute="trailing" id="mc3-W9-4T6"/>
                                                 <constraint firstItem="F1p-42-ZG5" firstAttribute="top" secondItem="wm5-q9-7EU" secondAttribute="top" constant="4" id="ndP-pS-TNv"/>
                                                 <constraint firstItem="Muu-Wo-wE9" firstAttribute="top" secondItem="F1p-42-ZG5" secondAttribute="top" id="v6d-A9-nT8"/>
@@ -70,6 +78,7 @@
                                         <color key="backgroundColor" red="0.10196078431372549" green="0.10588235294117647" blue="0.13333333333333333" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                                         <connections>
                                             <outlet property="dateLabel" destination="QMh-p5-0qL" id="dY2-JO-Hej"/>
+                                            <outlet property="gradientView" destination="pvk-na-bHI" id="cnD-0X-Asr"/>
                                             <outlet property="imageOfPost" destination="F1p-42-ZG5" id="eSc-f8-rM8"/>
                                             <outlet property="likeButton" destination="Muu-Wo-wE9" id="8cd-3v-pTU"/>
                                         </connections>
