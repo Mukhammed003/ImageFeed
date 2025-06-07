@@ -9,33 +9,26 @@ import UIKit
 
 final class ProfileViewController: UIViewController {
     
-    private var profileImage: UIImageView?
-    private var emptyInFavouritesSectionImage: UIImageView?
-    
-    private var exitButton: UIButton?
-    
-    private var nameLabel: UILabel?
-    private var emailLabel: UILabel?
-    private var descriptonLabel: UILabel?
-    private var favouritesLabel: UILabel?
+//    private var profileImage: UIImageView?
+//    private var emptyInFavouritesSectionImage: UIImageView?
+//    
+//    private var exitButton: UIButton?
+//    
+//    private var nameLabel: UILabel?
+//    private var emailLabel: UILabel?
+//    private var descriptonLabel: UILabel?
+//    private var favouritesLabel: UILabel?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         view.backgroundColor = .ypBlack
         
         let profileImage = createUIImageView(nameOfImage: "avatar", colorForBack: .ypBlack, radiusIfNeeded: 35)
-        
         let exitButton = createUIButton(imageForButton: "ipad.and.arrow.forward", forSelector: #selector(clickToExitButton), colorOfIcon: .ypRed)
-        
         let nameLabel = createUILabel(textOfLabel: "Екатерина Новикова", letterSpacing: 0.3, colorOfLabel: .ypWhite, fontSizeOfLabel: 23, weightOfLabel: .bold)
-        
         let emailLabel = createUILabel(textOfLabel: "@ekaterina_nov", letterSpacing: 0, colorOfLabel: .ypGray, fontSizeOfLabel: 13, weightOfLabel: .regular)
-        
         let descriptionLabel = createUILabel(textOfLabel: "Hello, world!", letterSpacing: 0, colorOfLabel: .ypWhite, fontSizeOfLabel: 13, weightOfLabel: .regular)
-        
         let favouritesLabel = createUILabel(textOfLabel: "Избранное", letterSpacing: 0.3, colorOfLabel: .ypWhite, fontSizeOfLabel: 23, weightOfLabel: .bold)
-        
         let emptyInFavouritesSectionImage = createUIImageView(nameOfImage: "no_photo_in_favourites", colorForBack: .ypBlack, radiusIfNeeded: 0)
         
         NSLayoutConstraint.activate([
@@ -43,7 +36,6 @@ final class ProfileViewController: UIViewController {
             profileImage.widthAnchor.constraint(equalToConstant: 70),
             profileImage.topAnchor.constraint(equalTo: view.topAnchor, constant: 76),
             profileImage.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
-            
             
             exitButton.heightAnchor.constraint(equalToConstant: 44),
             exitButton.widthAnchor.constraint(equalToConstant: 44),
@@ -68,13 +60,13 @@ final class ProfileViewController: UIViewController {
             emptyInFavouritesSectionImage.topAnchor.constraint(equalTo: favouritesLabel.bottomAnchor, constant: 110)
             ])
         
-        self.profileImage = profileImage
-        self.exitButton = exitButton
-        self.nameLabel = nameLabel
-        self.emailLabel = emailLabel
-        self.descriptonLabel = descriptionLabel
-        self.favouritesLabel = favouritesLabel
-        self.emptyInFavouritesSectionImage = emptyInFavouritesSectionImage
+//        self.profileImage = profileImage
+//        self.exitButton = exitButton
+//        self.nameLabel = nameLabel
+//        self.emailLabel = emailLabel
+//        self.descriptonLabel = descriptionLabel
+//        self.favouritesLabel = favouritesLabel
+//        self.emptyInFavouritesSectionImage = emptyInFavouritesSectionImage
         
     }
     
@@ -120,6 +112,8 @@ final class ProfileViewController: UIViewController {
         
         return exampleLabel
     }
+    
+    
     
     @objc func clickToExitButton() {}
 }
