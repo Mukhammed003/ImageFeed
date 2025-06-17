@@ -210,15 +210,17 @@
                                     <constraint firstAttribute="height" constant="60" id="Xk9-Rr-Bgn"/>
                                 </constraints>
                             </imageView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="h91-et-R1f">
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="MlK-rr-Kr9">
                                 <rect key="frame" x="16" y="714" width="361" height="48"/>
                                 <color key="backgroundColor" name="YP White"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="48" id="nzn-gD-9y2"/>
+                                    <constraint firstAttribute="height" constant="48" id="j5h-SM-nKS"/>
                                 </constraints>
-                                <color key="tintColor" name="YP Black"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain" title="Войти"/>
+                                <fontDescription key="fontDescription" name="SFPro-Bold" family="SF Pro" pointSize="17"/>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" title="Войти">
+                                    <color key="titleColor" name="YP Black"/>
+                                </state>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
                                         <integer key="value" value="16"/>
@@ -226,21 +228,24 @@
                                     <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
                                 </userDefinedRuntimeAttributes>
                                 <connections>
-                                    <segue destination="icn-KD-zKx" kind="show" identifier="ShowWebView" id="SY9-F8-APS"/>
+                                    <segue destination="icn-KD-zKx" kind="show" identifier="ShowWebView" id="0fz-oI-hd8"/>
                                 </connections>
                             </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="q8M-am-m0q"/>
                         <color key="backgroundColor" name="YP Black"/>
                         <constraints>
-                            <constraint firstItem="q8M-am-m0q" firstAttribute="bottom" secondItem="h91-et-R1f" secondAttribute="bottom" constant="90" id="ISf-Uf-et2"/>
+                            <constraint firstItem="q8M-am-m0q" firstAttribute="trailing" secondItem="MlK-rr-Kr9" secondAttribute="trailing" constant="16" id="63A-Xc-VZu"/>
+                            <constraint firstItem="MlK-rr-Kr9" firstAttribute="leading" secondItem="q8M-am-m0q" secondAttribute="leading" constant="16" id="Gqf-4d-K84"/>
                             <constraint firstItem="AhE-wR-69k" firstAttribute="centerY" secondItem="oKg-QR-eV7" secondAttribute="centerY" id="L3b-cW-o3c"/>
-                            <constraint firstItem="h91-et-R1f" firstAttribute="leading" secondItem="q8M-am-m0q" secondAttribute="leading" constant="16" id="cnY-gJ-tlb"/>
                             <constraint firstItem="AhE-wR-69k" firstAttribute="centerX" secondItem="oKg-QR-eV7" secondAttribute="centerX" id="gH3-mC-fhr"/>
-                            <constraint firstItem="q8M-am-m0q" firstAttribute="trailing" secondItem="h91-et-R1f" secondAttribute="trailing" constant="16" id="ud4-Rs-ss0"/>
+                            <constraint firstItem="q8M-am-m0q" firstAttribute="bottom" secondItem="MlK-rr-Kr9" secondAttribute="bottom" constant="90" id="l1Y-eR-gTJ"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="t0Z-ZY-r5d"/>
+                    <connections>
+                        <outlet property="LoginButton" destination="MlK-rr-Kr9" id="htg-bg-cuY"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Eif-Ew-gx0" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>

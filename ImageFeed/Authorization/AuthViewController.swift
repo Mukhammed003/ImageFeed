@@ -13,16 +13,19 @@ protocol AuthViewControllerDelegate: AnyObject {
 
 final class AuthViewController: UIViewController {
     
+    @IBOutlet weak var LoginButton: UIButton!
+    
     let showWebViewSegueIdentifier = "ShowWebView"
+    weak var delegate: AuthViewControllerDelegate?
     
     private let oauth2Service = OAuth2Service.shared
     
-    weak var delegate: AuthViewControllerDelegate?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         configureBackButton()
         
+        LoginButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 17)
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {

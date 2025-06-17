@@ -15,6 +15,7 @@ final class ImagesListCell: UITableViewCell {
     @IBOutlet weak var gradientView: UIView!
     
     static let reusedIdentifier = "ImagesListCell"
+    
     private var gradientLayer: CAGradientLayer?
     
     override func layoutSubviews() {
