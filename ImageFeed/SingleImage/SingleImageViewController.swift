@@ -8,6 +8,10 @@
 import UIKit
 
 final class SingleImageViewController: UIViewController {
+    
+    @IBOutlet weak var imageView: UIImageView!
+    @IBOutlet weak var scrollView: UIScrollView!
+    
     var image : UIImage? {
         didSet {
             guard isViewLoaded, let image else { return }
@@ -16,10 +20,6 @@ final class SingleImageViewController: UIViewController {
             rescaleAndCenterImageInScrollView(image: image)
         }
     }
-    
-    @IBOutlet weak var imageView: UIImageView!
-    
-    @IBOutlet weak var scrollView: UIScrollView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,6 +30,20 @@ final class SingleImageViewController: UIViewController {
         guard let image = image else { return }
         imageView.frame.size = image.size
         rescaleAndCenterImageInScrollView(image: image)
+    }
+    
+    
+    @IBAction private func didTapBackButton(_ sender: UIButton) {
+        dismiss(animated: true, completion: nil)
+    }
+    
+    @IBAction func didTapShareButton(_ sender: Any) {
+        guard let image = image else { return }
+        let activity = UIActivityViewController(activityItems: [image], applicationActivities: nil)
+        present(activity, animated: true, completion: nil)
+    }
+    
+    @IBAction func didTapLikeButton(_ sender: Any) {
     }
     
     private func rescaleAndCenterImageInScrollView(image: UIImage) {
@@ -56,19 +70,6 @@ final class SingleImageViewController: UIViewController {
         let x = (newContentSize.width - visibleRectSize.width) / 2
         let y = (newContentSize.height - visibleRectSize.height) / 2
         scrollView.setContentOffset(CGPoint(x: x, y: y), animated: false)
-    }
-    
-    @IBAction private func didTapBackButton(_ sender: UIButton) {
-        dismiss(animated: true, completion: nil)
-    }
-    
-    @IBAction func didTapShareButton(_ sender: Any) {
-        guard let image = image else { return }
-        let activity = UIActivityViewController(activityItems: [image], applicationActivities: nil)
-        present(activity, animated: true, completion: nil)
-    }
-    
-    @IBAction func didTapLikeButton(_ sender: Any) {
     }
 }
 

@@ -70,6 +70,8 @@ final class ProfileViewController: UIViewController {
         
     }
     
+    @objc func clickToExitButton() {}
+    
     func createUIImageView(nameOfImage imageName: String, colorForBack backgroundColor: UIColor, radiusIfNeeded cornerRadius: CGFloat) -> UIImageView {
         let exampleImage = UIImage(named: imageName)
         let exampleImageView = UIImageView(image: exampleImage)
@@ -112,8 +114,4 @@ final class ProfileViewController: UIViewController {
         
         return exampleLabel
     }
-    
-    
-    
-    @objc func clickToExitButton() {}
 }
