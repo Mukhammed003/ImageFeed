@@ -31,12 +31,15 @@ final class OAuth2Service {
                     switch result {
                     case .success(let data):
                         do {
-                            let tokenResponse = try JSONDecoder().decode(OAuthTokenResponseBody.self, from: data)
-                            let token = tokenResponse.accessToken
-                            self.tokenStorage.token = token
-                            print("✅ Токен сохранён: \(token)")
-                            DispatchQueue.main.async {
-                                completion(.success(token))
+                            let decoder = JSONDecoder()
+                            decoder.keyDecodingStrategy = .convertFromSnakeCase
+                            if let tokenResponse = try? decoder.decode(OAuthTokenResponseBody.self, from: data) {
+                                let token = tokenResponse.accessToken
+                                self.tokenStorage.token = token
+                                print("✅ Токен сохранён: \(token)")
+                                DispatchQueue.main.async {
+                                    completion(.success(token))
+                                }
                             }
                         } catch {
                             print("❌ Ошибка декодирования токена: \(error)")

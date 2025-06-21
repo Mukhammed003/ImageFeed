@@ -21,6 +21,13 @@ final class SplashViewController: UIViewController {
         } else {
             performSegue(withIdentifier: showAuthenticationScreenSegueIdentifier, sender: nil)
         }
+        
+        for family in UIFont.familyNames {
+            print("Family: \(family)")
+            for name in UIFont.fontNames(forFamilyName: family) {
+                print("  Font: \(name)")
+            }
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
