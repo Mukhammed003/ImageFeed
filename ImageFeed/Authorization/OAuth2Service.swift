@@ -7,10 +7,17 @@
 
 import Foundation
 
+enum AuthServiceError: Error {
+    case invalidRequest
+}
+
 final class OAuth2Service {
     
     static let shared = OAuth2Service()
     
+    private let urlSession = URLSession.shared
+    private var task: URLSessionTask?
+    private var lastCode: String?
     private let tokenStorage = OAuth2TokenStorage()
     
     init() {}
@@ -18,45 +25,70 @@ final class OAuth2Service {
     func fetchOAuthToken(
         code: String,
         completion: @escaping (Result<String, Error>) -> Void) {
+            assert(Thread.isMainThread)
+            if task != nil {
+                if lastCode != code {
+                    task?.cancel()
+                } else {
+                    completion(.failure(AuthServiceError.invalidRequest))
+                    return
+                }
+            } else {
+                if lastCode == code {
+                    completion(.failure(AuthServiceError.invalidRequest))
+                    return
+                }
+            }
+            lastCode = code
             
-            guard let request = makeOAuthTokenRequest(code: code) else {
-                    DispatchQueue.main.async {
-                        print("❌ Ошибка создания запроса")
-                        completion(.failure(NetworkError.urlSessionError))
-                    }
+            guard
+                let request = makeOAuthTokenRequest(code: code) else {
+                    print("❌ Ошибка создания запроса")
+                    completion(.failure(NetworkError.urlSessionError))
                     return
                 }
 
-                let task = URLSession.shared.data(for: request) { result in
-                    switch result {
-                    case .success(let data):
-                        do {
-                            let decoder = JSONDecoder()
-                            decoder.keyDecodingStrategy = .convertFromSnakeCase
-                            if let tokenResponse = try? decoder.decode(OAuthTokenResponseBody.self, from: data) {
-                                let token = tokenResponse.accessToken
-                                self.tokenStorage.token = token
-                                print("✅ Токен сохранён: \(token)")
-                                DispatchQueue.main.async {
-                                    completion(.success(token))
-                                }
-                            }
-                        } catch {
-                            print("❌ Ошибка декодирования токена: \(error)")
-                            DispatchQueue.main.async {
-                                completion(.failure(error))
-                            }
-                        }
-
-                    case .failure(let error):
-                        print("❌ Сетевая ошибка или ошибка запроса: \(error)")
-                        DispatchQueue.main.async {
-                            completion(.failure(error))
-                        }
+            let task = urlSession.dataTask(with: request) { [weak self] data, response, error in
+                DispatchQueue.main.async {
+                    defer {
+                        self?.task = nil
+                        self?.lastCode = nil
+                    }
+                    
+                    if let error = error as NSError?, error.code == NSURLErrorCancelled {
+                        print("Запрос отменён")
+                        completion(.failure(AuthServiceError.invalidRequest))
+                        return
+                    }
+                    
+                    if let error = error {
+                        print("❌ Сетевая ошибка: \(error)")
+                        completion(.failure(error))
+                        return
+                    }
+                    
+                    guard let data = data else {
+                        print("❌ Пустой ответ")
+                        completion(.failure(AuthServiceError.invalidRequest))
+                        return
+                    }
+                    
+                    do {
+                        let decoder = JSONDecoder()
+                        decoder.keyDecodingStrategy = .convertFromSnakeCase
+                        let tokenResponse = try decoder.decode(OAuthTokenResponseBody.self, from: data)
+                        let token = tokenResponse.accessToken
+                        self?.tokenStorage.token = token
+                        print("✅ Токен сохранён: \(token)")
+                        completion(.success(token))
+                    } catch {
+                        print("❌ Ошибка декодирования токена: \(error)")
+                        completion(.failure(error))
                     }
                 }
-
-                task.resume()
+            }
+            self.task = task
+            task.resume()
     }
     
     private func makeOAuthTokenRequest(code: String) -> URLRequest? {

@@ -10,23 +10,17 @@ final class SplashViewController: UIViewController {
     
     private let showAuthenticationScreenSegueIdentifier = "ShowAuthenticationScreen"
     
+    private let profileService = ProfileService.shared
     private let oAuth2Service = OAuth2Service()
     private let storage = OAuth2TokenStorage()
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        if storage.token != nil {
-            switchToTabBarController()
+        if let token = storage.token {
+            fetchProfile(token)
         } else {
             performSegue(withIdentifier: showAuthenticationScreenSegueIdentifier, sender: nil)
-        }
-        
-        for family in UIFont.familyNames {
-            print("Family: \(family)")
-            for name in UIFont.fontNames(forFamilyName: family) {
-                print("  Font: \(name)")
-            }
         }
     }
     
@@ -72,6 +66,12 @@ extension SplashViewController {
 extension SplashViewController: AuthViewControllerDelegate {
     func didAuthenticate(_ vc: AuthViewController, didAuthenticateWithCode code: String) {
         dismiss(animated: true)
+        
+        guard let token = storage.token else {
+            return
+        }
+        
+        fetchProfile(token)
     }
     
     func fetchOAuthToken(_ code: String) {
@@ -85,5 +85,26 @@ extension SplashViewController: AuthViewControllerDelegate {
                     break
                 }
             }
+    }
+    
+    private func fetchProfile(_ token: String) {
+        UIBlockingProgressHUD.show()
+        profileService.fetchProfile(token) { [weak self] result in
+            UIBlockingProgressHUD.dismiss()
+            
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let profile):
+                let username = profile.username
+                ProfileImageService.shared.fetchProfileImageURL(username: username) { _ in
+    
+                }
+                self.switchToTabBarController()
+            case .failure:
+                // TODO [Sprint 11]
+                break
+            }
+        }
     }
 }
