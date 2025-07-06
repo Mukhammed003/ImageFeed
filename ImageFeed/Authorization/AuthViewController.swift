@@ -20,11 +20,12 @@ final class AuthViewController: UIViewController {
     weak var delegate: AuthViewControllerDelegate?
     
     private let oauth2Service = OAuth2Service.shared
-    
+    private var alertPresenter: AlertPresenter?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         configureBackButton()
+        alertPresenter = AlertPresenter(viewController: self)
         
         LoginButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 17)
     }
@@ -58,14 +59,20 @@ extension AuthViewController: WebViewViewControllerDelegate {
             guard let self else { return }
             
             UIBlockingProgressHUD.dismiss()
-                    switch result {
-                    case .success(let token):
-                        print("✅ Авторизация прошла успешно, токен: \(token)")
-                        delegate?.didAuthenticate(self, didAuthenticateWithCode: code)
-                    case .failure(let error):
-                        print("❌ Ошибка при получении токена: \(error)")
-                    }
-                }
+            switch result {
+            case .success(let token):
+                print("✅ Авторизация прошла успешно, токен: \(token)")
+                delegate?.didAuthenticate(self, didAuthenticateWithCode: code)
+            case .failure(let error):
+                let alertModel = AlertModel(
+                    title: "Что-то пошло не так",
+                    message: "Не удалось войти в систему",
+                    buttonText: "Ок",
+                    completion: { })
+                alertPresenter?.showAlert(alert: alertModel)
+                print("❌ Ошибка при получении токена: \(error)")
+            }
+        }
     }
     
     func webViewViewControllerDidCancel(_ vc: WebViewViewController) {

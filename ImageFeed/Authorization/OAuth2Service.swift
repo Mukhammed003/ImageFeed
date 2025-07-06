@@ -43,46 +43,29 @@ final class OAuth2Service {
             
             guard
                 let request = makeOAuthTokenRequest(code: code) else {
-                    print("❌ Ошибка создания запроса")
+                print("[OAuth2Service.fetchOAuthToken]: Failure - Request creation error")
                     completion(.failure(NetworkError.urlSessionError))
                     return
                 }
 
-            let task = urlSession.dataTask(with: request) { [weak self] data, response, error in
+            let task = urlSession.objectTask(for: request) { [weak self] (result: Result<OAuthTokenResponseBody, Error>) in
+                
                 DispatchQueue.main.async {
+                    guard let self = self else { return }
+                    
                     defer {
-                        self?.task = nil
-                        self?.lastCode = nil
+                        self.task = nil
+                        self.lastCode = nil
                     }
                     
-                    if let error = error as NSError?, error.code == NSURLErrorCancelled {
-                        print("Запрос отменён")
-                        completion(.failure(AuthServiceError.invalidRequest))
-                        return
-                    }
-                    
-                    if let error = error {
-                        print("❌ Сетевая ошибка: \(error)")
-                        completion(.failure(error))
-                        return
-                    }
-                    
-                    guard let data = data else {
-                        print("❌ Пустой ответ")
-                        completion(.failure(AuthServiceError.invalidRequest))
-                        return
-                    }
-                    
-                    do {
-                        let decoder = JSONDecoder()
-                        decoder.keyDecodingStrategy = .convertFromSnakeCase
-                        let tokenResponse = try decoder.decode(OAuthTokenResponseBody.self, from: data)
+                    switch result {
+                    case .success(let tokenResponse):
                         let token = tokenResponse.accessToken
-                        self?.tokenStorage.token = token
-                        print("✅ Токен сохранён: \(token)")
+                        self.tokenStorage.token = token
+                        print("[OAuth2Service.fetchOAuthToken]: Success - token received")
                         completion(.success(token))
-                    } catch {
-                        print("❌ Ошибка декодирования токена: \(error)")
+                    case .failure(let error):
+                        print("[OAuth2Service.fetchOAuthToken]: Failure - \(error.localizedDescription)")
                         completion(.failure(error))
                     }
                 }

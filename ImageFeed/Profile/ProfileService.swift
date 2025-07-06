@@ -42,47 +42,29 @@ final class ProfileService {
             
             guard
                 let request = makeRequestForGettingUserData(bearerToken: token) else {
-                print("❌ Ошибка создания запроса")
+                print("[ProfileService.fetchProfile]: Failure - Request creation error")
                 completion(.failure(NetworkError.urlSessionError))
                 return
             }
             
-            let task = urlSession.dataTask(with: request) { [weak self] data, response, error in
+            let task = urlSession.objectTask(for: request) { [weak self] (result: Result<ProfileResult, Error>) in
+                
                 DispatchQueue.main.async {
+                    guard let self = self else { return }
+                    
                     defer {
-                        self?.task = nil
-                        self?.lastToken = nil 
+                        self.task = nil
+                        self.lastToken = nil
                     }
                     
-                    if let error = error as NSError?, error.code == NSURLErrorCancelled {
-                        print("Запрос отменён")
-                        completion(.failure(ProfileServiceError.invalidRequest))
-                        return
-                    }
-                    
-                    if let error = error {
-                        print("❌ Сетевая ошибка: \(error)")
-                        completion(.failure(error))
-                        return
-                    }
-                    
-                    guard let data = data else {
-                        print("❌ Пустой ответ")
-                        completion(.failure(ProfileServiceError.invalidRequest))
-                        return
-                    }
-                    do {
-                        let decoder = JSONDecoder()
-                        decoder.keyDecodingStrategy = .convertFromSnakeCase
-                        let profileInfo = try decoder.decode(ProfileResult.self, from: data)
-                        guard let profile = self?.convertToProile(profileResult: profileInfo) else {
-                            print("Ошибка распаковки Profile")
-                            return
-                        }
-                        self?.profile = profile
+                    switch result {
+                    case .success(let profileInfo):
+                        let profile = self.convertToProfile(profileResult: profileInfo)
+                        self.profile = profile
+                        print("[ProfileService.fetchProfile]: Success - Profile info received")
                         completion(.success(profile))
-                    } catch {
-                        print("❌ Ошибка декодирования пользовательских данных: \(error)")
+                    case .failure(let error):
+                        print("[ProfileService.fetchProfile]: Failure - \(error.localizedDescription)")
                         completion(.failure(error))
                     }
                 }
@@ -106,7 +88,7 @@ final class ProfileService {
         return request
     }
     
-    private func convertToProile(profileResult: ProfileResult) -> Profile {
+    private func convertToProfile(profileResult: ProfileResult) -> Profile {
         return Profile(
             username: profileResult.username,
             name: "\(profileResult.firstName) \(profileResult.lastName)",

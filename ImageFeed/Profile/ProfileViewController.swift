@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Kingfisher
 
 final class ProfileViewController: UIViewController {
     
@@ -14,7 +15,7 @@ final class ProfileViewController: UIViewController {
     private var exitButton: UIButton!
     private var nameLabel: UILabel!
     private var emailLabel: UILabel!
-    private var descriptonLabel: UILabel!
+    private var descriptionLabel: UILabel!
     private var favouritesLabel: UILabel!
     
     private var profileImageServiceObserver: NSObjectProtocol?
@@ -29,18 +30,7 @@ final class ProfileViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .ypBlack
         
-        profileImageServiceObserver = NotificationCenter.default
-            .addObserver(
-                forName: ProfileImageService.didChangeNotification,
-                object: nil,
-                queue: .main
-            ) { [weak self] _ in
-                guard let self = self else { return }
-                self.updateAvatar()
-                }
-        updateAvatar()
-        
-        let profileImage = createUIImageView(nameOfImage: "avatar", colorForBack: .ypBlack, radiusIfNeeded: 35)
+        let profileImage = createUIImageView(nameOfImage: "example_profile_avatar", colorForBack: .ypBlack, radiusIfNeeded: 35)
         let exitButton = createUIButton(imageForButton: "ipad.and.arrow.forward", forSelector: #selector(clickToExitButton), colorOfIcon: .ypRed)
         let nameLabel = createUILabel(textOfLabel: "Екатерина Новикова", letterSpacing: 0.3, colorOfLabel: .ypWhite, fontSizeOfLabel: 23, weightOfLabel: .bold)
         let emailLabel = createUILabel(textOfLabel: "@ekaterina_nov", letterSpacing: 0, colorOfLabel: .ypGray, fontSizeOfLabel: 13, weightOfLabel: .regular)
@@ -81,7 +71,7 @@ final class ProfileViewController: UIViewController {
         self.exitButton = exitButton
         self.nameLabel = nameLabel
         self.emailLabel = emailLabel
-        self.descriptonLabel = descriptionLabel
+        self.descriptionLabel = descriptionLabel
         self.favouritesLabel = favouritesLabel
         self.emptyInFavouritesSectionImage = emptyInFavouritesSectionImage
         
@@ -90,6 +80,18 @@ final class ProfileViewController: UIViewController {
             return }
         
         updateProfileDetails(profile: profile)
+        
+        profileImageServiceObserver = NotificationCenter.default
+            .addObserver(
+                forName: ProfileImageService.didChangeNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                guard let self = self else { return }
+                self.updateAvatar()
+                }
+        
+        updateAvatar()
     }
     
     @objc func clickToExitButton() {}
@@ -98,6 +100,7 @@ final class ProfileViewController: UIViewController {
         let exampleImage = UIImage(named: imageName)
         let exampleImageView = UIImageView(image: exampleImage)
         exampleImageView.backgroundColor = backgroundColor
+        exampleImageView.clipsToBounds = true
         
         if cornerRadius != 0 {
             exampleImageView.layer.cornerRadius = cornerRadius
@@ -140,14 +143,22 @@ final class ProfileViewController: UIViewController {
     private func updateProfileDetails(profile: Profile) {
         self.nameLabel.text = profile.name
         self.emailLabel.text = profile.loginName
-        self.descriptonLabel.text = profile.bio
+        self.descriptionLabel.text = profile.bio
     }
     
     private func updateAvatar() {
         guard
             let profileImageURL = ProfileImageService.shared.avatarURL,
             let url = URL(string: profileImageURL)
-        else { return }
-        // TODO [Sprint 11] Обновить аватар, используя Kingfisher
+            else {
+                print("❌ Невалидный URL: \(ProfileImageService.shared.avatarURL ?? "nil")")
+                return
+            }
+        
+        let processor = RoundCornerImageProcessor(cornerRadius: 64)
+        self.profileImage.kf.indicatorType = .activity
+        self.profileImage.kf.setImage(with: url,
+                                      placeholder: UIImage(named: "placeholder.jpeg"),
+                                      options: [.processor(processor)])
     }
 }

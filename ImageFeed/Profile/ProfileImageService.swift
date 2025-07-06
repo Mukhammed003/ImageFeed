@@ -46,57 +46,44 @@ final class ProfileImageService {
             
             guard
                 let request = makeRequestForGettingUserImage(userName: username) else {
-                print("❌ Ошибка создания запроса")
+                print("[ProfileImageService.fetchProfileImageURL]: Failure - Request creation error")
                 completion(.failure(NetworkError.urlSessionError))
                 return
             }
             
-            let task = urlSession.dataTask(with: request) { [weak self] data, response, error in
+            let task = urlSession.objectTask(for: request) { [weak self] (result: Result<UserResult, Error>) in
+                
                 DispatchQueue.main.async {
+                    guard let self = self else { return }
+                    
                     defer {
-                        self?.task = nil
-                        self?.lastUsername = nil
+                        self.task = nil
+                        self.lastUsername = nil
                     }
                     
-                    if let error = error as NSError?, error.code == NSURLErrorCancelled {
-                        print("Запрос отменён")
-                        completion(.failure(ProfileImageServiceError.invalidRequest))
-                        return
-                    }
-                    
-                    if let error = error {
-                        print("❌ Сетевая ошибка: \(error)")
-                        completion(.failure(error))
-                        return
-                    }
-                    
-                    guard let data = data else {
-                        print("❌ Пустой ответ")
-                        completion(.failure(ProfileImageServiceError.invalidRequest))
-                        return
-                    }
-                    do {
-                        let decoder = JSONDecoder()
-                        decoder.keyDecodingStrategy = .convertFromSnakeCase
-                        let bodyAfterDecoding = try decoder.decode(UserResult.self, from: data)
-                        guard let avatarURL = bodyAfterDecoding.profileImage?.small else { return }
-                        self?.avatarURL = avatarURL
+                    switch result {
+                    case .success(let userInfo):
+                        guard let avatarURL = userInfo.profileImage.large else {
+                            print("[ProfileImageService.fetchProfileImageURL]: Failure - missing avatarURL from profileImage.large")
+                            return
+                        }
+                        self.avatarURL = avatarURL
+                        print("[ProfileImageService.fetchProfileImageURL]: Success - Profile avater received: \(avatarURL)")
                         completion(.success(avatarURL))
                         NotificationCenter.default
                             .post(
                                 name: ProfileImageService.didChangeNotification,
                                 object: self,
                                 userInfo: ["URL": avatarURL])
-                    } catch {
-                        print("❌ Ошибка декодирования пользовательской аватарки: \(error)")
+                    case .failure(let error):
+                        print("[ProfileImageService.fetchProfileImageURL]: Failure - \(error.localizedDescription)")
                         completion(.failure(error))
                     }
                 }
             }
             self.task = task
             task.resume()
-            
-    }
+        }
     
     private func makeRequestForGettingUserImage(userName: String) -> URLRequest? {
         var components = URLComponents()
@@ -107,7 +94,11 @@ final class ProfileImageService {
         }
         
         var request = URLRequest(url: url)
-        request.setValue("Bearer \(String(describing: storage.token))", forHTTPHeaderField: "Authorization")
+        guard let token = storage.token else {
+            print("[ProfileImageService.makeRequestForGettingUserImage]: Failure - no token available")
+            return nil
+        }
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.httpMethod = "GET"
         
         return request

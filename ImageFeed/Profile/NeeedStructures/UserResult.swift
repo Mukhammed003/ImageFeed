@@ -6,9 +6,9 @@
 //
 
 struct UserResult: Codable {
-    let profileImage: ProfileImage?
+    let profileImage: ProfileImage
 }
 
 struct ProfileImage: Codable {
-    let small: String?
+    let large: String?
 }
