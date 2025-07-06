@@ -18,7 +18,7 @@ final class OAuth2Service {
     private let urlSession = URLSession.shared
     private var task: URLSessionTask?
     private var lastCode: String?
-    private let tokenStorage = OAuth2TokenStorage()
+    private let tokenStorage = OAuth2TokenStorage.shared
     
     init() {}
     
@@ -44,35 +44,33 @@ final class OAuth2Service {
             guard
                 let request = makeOAuthTokenRequest(code: code) else {
                 print("[OAuth2Service.fetchOAuthToken]: Failure - Request creation error")
-                    completion(.failure(NetworkError.urlSessionError))
-                    return
-                }
-
+                completion(.failure(NetworkError.urlSessionError))
+                return
+            }
+            
             let task = urlSession.objectTask(for: request) { [weak self] (result: Result<OAuthTokenResponseBody, Error>) in
                 
-                DispatchQueue.main.async {
-                    guard let self = self else { return }
-                    
-                    defer {
-                        self.task = nil
-                        self.lastCode = nil
-                    }
-                    
-                    switch result {
-                    case .success(let tokenResponse):
-                        let token = tokenResponse.accessToken
-                        self.tokenStorage.token = token
-                        print("[OAuth2Service.fetchOAuthToken]: Success - token received")
-                        completion(.success(token))
-                    case .failure(let error):
-                        print("[OAuth2Service.fetchOAuthToken]: Failure - \(error.localizedDescription)")
-                        completion(.failure(error))
-                    }
+                guard let self = self else { return }
+                
+                defer {
+                    self.task = nil
+                    self.lastCode = nil
+                }
+                
+                switch result {
+                case .success(let tokenResponse):
+                    let token = tokenResponse.accessToken
+                    self.tokenStorage.token = token
+                    print("[OAuth2Service.fetchOAuthToken]: Success - token received")
+                    completion(.success(token))
+                case .failure(let error):
+                    print("[OAuth2Service.fetchOAuthToken]: Failure - \(error.localizedDescription)")
+                    completion(.failure(error))
                 }
             }
             self.task = task
             task.resume()
-    }
+        }
     
     private func makeOAuthTokenRequest(code: String) -> URLRequest? {
         var components = URLComponents()
@@ -81,7 +79,7 @@ final class OAuth2Service {
             URLQueryItem(name: "client_id", value: Constants.accessKey),
             URLQueryItem(name: "client_secret", value: Constants.secretKey),
             URLQueryItem(name: "redirect_uri", value: Constants.redirectURI),
-            URLQueryItem(name: "code", value: "code"),
+            URLQueryItem(name: "code", value: code),
             URLQueryItem(name: "grant_type", value: "authorization_code")
         ]
         
@@ -91,7 +89,7 @@ final class OAuth2Service {
         }
         
         var request = URLRequest(url: url)
-        request.httpMethod = "POST"
+        request.httpMethod = HTTPMethod.post.rawValue
         
         return request
     }

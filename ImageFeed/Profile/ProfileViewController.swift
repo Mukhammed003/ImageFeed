@@ -10,13 +10,13 @@ import Kingfisher
 
 final class ProfileViewController: UIViewController {
     
-    private var profileImage: UIImageView!
-    private var emptyInFavouritesSectionImage: UIImageView!
-    private var exitButton: UIButton!
-    private var nameLabel: UILabel!
-    private var emailLabel: UILabel!
-    private var descriptionLabel: UILabel!
-    private var favouritesLabel: UILabel!
+    private var profileImage: UIImageView?
+    private var emptyInFavouritesSectionImage: UIImageView?
+    private var exitButton: UIButton?
+    private var nameLabel: UILabel?
+    private var emailLabel: UILabel?
+    private var descriptionLabel: UILabel?
+    private var favouritesLabel: UILabel?
     
     private var profileImageServiceObserver: NSObjectProtocol?
     
@@ -141,9 +141,9 @@ final class ProfileViewController: UIViewController {
     }
     
     private func updateProfileDetails(profile: Profile) {
-        self.nameLabel.text = profile.name
-        self.emailLabel.text = profile.loginName
-        self.descriptionLabel.text = profile.bio
+        self.nameLabel?.text = profile.name
+        self.emailLabel?.text = profile.loginName
+        self.descriptionLabel?.text = profile.bio
     }
     
     private func updateAvatar() {
@@ -156,8 +156,8 @@ final class ProfileViewController: UIViewController {
             }
         
         let processor = RoundCornerImageProcessor(cornerRadius: 64)
-        self.profileImage.kf.indicatorType = .activity
-        self.profileImage.kf.setImage(with: url,
+        self.profileImage?.kf.indicatorType = .activity
+        self.profileImage?.kf.setImage(with: url,
                                       placeholder: UIImage(named: "placeholder.jpeg"),
                                       options: [.processor(processor)])
     }

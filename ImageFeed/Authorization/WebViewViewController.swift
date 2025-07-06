@@ -19,8 +19,8 @@ enum WebViewConstants {
 
 final class WebViewViewController: UIViewController {
     
-    @IBOutlet private var progressView: UIProgressView!
-    @IBOutlet private var webView: WKWebView!
+    @IBOutlet private var progressView: UIProgressView?
+    @IBOutlet private var webView: WKWebView?
     
     weak var delegate: WebViewViewControllerDelegate?
     
@@ -29,7 +29,7 @@ final class WebViewViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        estimatedProgressObservation = webView.observe(
+        estimatedProgressObservation = webView?.observe(
             \.estimatedProgress,
             options: [],
              changeHandler: {[weak self] _, _ in
@@ -37,13 +37,13 @@ final class WebViewViewController: UIViewController {
                  self.updateProgress()
              })
         
-        webView.navigationDelegate = self
+        webView?.navigationDelegate = self
         loadAuthView()
     }
     
     private func updateProgress() {
-        progressView.progress = Float(webView.estimatedProgress)
-        progressView.isHidden = fabs(webView.estimatedProgress - 1.0) <= 0.0001
+        progressView?.progress = Float(webView?.estimatedProgress ?? 0)
+        progressView?.isHidden = fabs((webView?.estimatedProgress ?? 1.0) - 1.0) <= 0.0001
     }
     
     private func loadAuthView() {
@@ -63,7 +63,7 @@ final class WebViewViewController: UIViewController {
             return }
         
         let request = URLRequest(url: url)
-        webView.load(request)
+        webView?.load(request)
         updateProgress()
     }
 }

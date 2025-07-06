@@ -16,11 +16,11 @@ final class ProfileImageService {
     static let shared = ProfileImageService()
     static let didChangeNotification = Notification.Name(rawValue: "ProfileImageProviderDidChange")
     
-    private let storage = OAuth2TokenStorage()
+    private let storage = OAuth2TokenStorage.shared
     private let urlSession = URLSession.shared
     private var task: URLSessionTask?
     private var lastUsername: String?
-    private (set) var avatarURL: String?
+    private(set) var avatarURL: String?
     
     private init() {}
     
@@ -53,32 +53,30 @@ final class ProfileImageService {
             
             let task = urlSession.objectTask(for: request) { [weak self] (result: Result<UserResult, Error>) in
                 
-                DispatchQueue.main.async {
-                    guard let self = self else { return }
-                    
-                    defer {
-                        self.task = nil
-                        self.lastUsername = nil
+                guard let self = self else { return }
+                
+                defer {
+                    self.task = nil
+                    self.lastUsername = nil
+                }
+                
+                switch result {
+                case .success(let userInfo):
+                    guard let avatarURL = userInfo.profileImage.large else {
+                        print("[ProfileImageService.fetchProfileImageURL]: Failure - missing avatarURL from profileImage.large")
+                        return
                     }
-                    
-                    switch result {
-                    case .success(let userInfo):
-                        guard let avatarURL = userInfo.profileImage.large else {
-                            print("[ProfileImageService.fetchProfileImageURL]: Failure - missing avatarURL from profileImage.large")
-                            return
-                        }
-                        self.avatarURL = avatarURL
-                        print("[ProfileImageService.fetchProfileImageURL]: Success - Profile avater received: \(avatarURL)")
-                        completion(.success(avatarURL))
-                        NotificationCenter.default
-                            .post(
-                                name: ProfileImageService.didChangeNotification,
-                                object: self,
-                                userInfo: ["URL": avatarURL])
-                    case .failure(let error):
-                        print("[ProfileImageService.fetchProfileImageURL]: Failure - \(error.localizedDescription)")
-                        completion(.failure(error))
-                    }
+                    self.avatarURL = avatarURL
+                    print("[ProfileImageService.fetchProfileImageURL]: Success - Profile avater received: \(avatarURL)")
+                    completion(.success(avatarURL))
+                    NotificationCenter.default
+                        .post(
+                            name: ProfileImageService.didChangeNotification,
+                            object: self,
+                            userInfo: ["URL": avatarURL])
+                case .failure(let error):
+                    print("[ProfileImageService.fetchProfileImageURL]: Failure - \(error.localizedDescription)")
+                    completion(.failure(error))
                 }
             }
             self.task = task
@@ -99,7 +97,7 @@ final class ProfileImageService {
             return nil
         }
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        request.httpMethod = "GET"
+        request.httpMethod = HTTPMethod.get.rawValue
         
         return request
     }

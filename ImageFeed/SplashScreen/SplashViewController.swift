@@ -12,9 +12,9 @@ final class SplashViewController: UIViewController {
     
     private let profileService = ProfileService.shared
     private let oAuth2Service = OAuth2Service()
-    private let storage = OAuth2TokenStorage()
+    private let storage = OAuth2TokenStorage.shared
     
-    private var logoImage: UIImageView!
+    private var logoImage: UIImageView?
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -31,7 +31,7 @@ final class SplashViewController: UIViewController {
             fetchProfile(token)
         } else {
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
-            let viewController = storyboard.instantiateViewController(withIdentifier: "AuthViewController") as! AuthViewController
+            guard let viewController = storyboard.instantiateViewController(withIdentifier: "AuthViewController") as? AuthViewController else { return }
             viewController.delegate = self
             
             let navigationController = UINavigationController(rootViewController: viewController)
@@ -106,7 +106,10 @@ extension SplashViewController: AuthViewControllerDelegate {
         UIBlockingProgressHUD.show()
         profileService.fetchProfile(token) { [weak self] result in
             
-            guard let self = self else { return }
+            guard let self = self else {
+                UIBlockingProgressHUD.dismiss()
+                return
+            }
             
             switch result {
             case .success(let profile):
@@ -117,6 +120,7 @@ extension SplashViewController: AuthViewControllerDelegate {
                 self.switchToTabBarController()
             case .failure:
                 // TODO [Sprint 11]
+                UIBlockingProgressHUD.dismiss()
                 break
             }
         }

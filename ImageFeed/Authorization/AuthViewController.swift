@@ -14,7 +14,7 @@ protocol AuthViewControllerDelegate: AnyObject {
 
 final class AuthViewController: UIViewController {
     
-    @IBOutlet weak var LoginButton: UIButton!
+    @IBOutlet weak var loginButton: UIButton?
     
     let showWebViewSegueIdentifier = "ShowWebView"
     weak var delegate: AuthViewControllerDelegate?
@@ -27,7 +27,7 @@ final class AuthViewController: UIViewController {
         configureBackButton()
         alertPresenter = AlertPresenter(viewController: self)
         
-        LoginButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 17)
+        loginButton?.titleLabel?.font = UIFont.boldSystemFont(ofSize: 17)
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -43,8 +43,8 @@ final class AuthViewController: UIViewController {
     }
     
     private func configureBackButton() {
-        navigationController?.navigationBar.backIndicatorImage = UIImage(named: "nav_back_button")
-        navigationController?.navigationBar.backIndicatorTransitionMaskImage = UIImage(named: "nav_back_button")
+        navigationController?.navigationBar.backIndicatorImage = UIImage(resource: .navBackButton)
+        navigationController?.navigationBar.backIndicatorTransitionMaskImage = UIImage(resource: .navBackButton)
         navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
         navigationItem.backBarButtonItem?.tintColor = UIColor(named: "YP Black")
     }
@@ -56,7 +56,10 @@ extension AuthViewController: WebViewViewControllerDelegate {
         UIBlockingProgressHUD.show()
         
         oauth2Service.fetchOAuthToken(code: code) { [weak self] result in
-            guard let self else { return }
+            guard let self else {
+                UIBlockingProgressHUD.dismiss()
+                return
+            }
             
             UIBlockingProgressHUD.dismiss()
             switch result {

@@ -49,24 +49,22 @@ final class ProfileService {
             
             let task = urlSession.objectTask(for: request) { [weak self] (result: Result<ProfileResult, Error>) in
                 
-                DispatchQueue.main.async {
-                    guard let self = self else { return }
-                    
-                    defer {
-                        self.task = nil
-                        self.lastToken = nil
-                    }
-                    
-                    switch result {
-                    case .success(let profileInfo):
-                        let profile = self.convertToProfile(profileResult: profileInfo)
-                        self.profile = profile
-                        print("[ProfileService.fetchProfile]: Success - Profile info received")
-                        completion(.success(profile))
-                    case .failure(let error):
-                        print("[ProfileService.fetchProfile]: Failure - \(error.localizedDescription)")
-                        completion(.failure(error))
-                    }
+                guard let self = self else { return }
+                
+                defer {
+                    self.task = nil
+                    self.lastToken = nil
+                }
+                
+                switch result {
+                case .success(let profileInfo):
+                    let profile = self.convertToProfile(profileResult: profileInfo)
+                    self.profile = profile
+                    print("[ProfileService.fetchProfile]: Success - Profile info received")
+                    completion(.success(profile))
+                case .failure(let error):
+                    print("[ProfileService.fetchProfile]: Failure - \(error.localizedDescription)")
+                    completion(.failure(error))
                 }
             }
             self.task = task
@@ -83,7 +81,7 @@ final class ProfileService {
         
         var request = URLRequest(url: url)
         request.setValue("Bearer \(bearerToken)", forHTTPHeaderField: "Authorization")
-        request.httpMethod = "GET"
+        request.httpMethod = HTTPMethod.get.rawValue
         
         return request
     }

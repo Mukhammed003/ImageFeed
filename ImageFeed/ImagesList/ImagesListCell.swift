@@ -9,32 +9,34 @@ import UIKit
 
 final class ImagesListCell: UITableViewCell {
     
-    @IBOutlet weak var imageOfPost: UIImageView!
-    @IBOutlet weak var dateLabel: UILabel!
-    @IBOutlet weak var likeButton: UIButton!
-    @IBOutlet weak var gradientView: UIView!
+    @IBOutlet weak var imageOfPost: UIImageView?
+    @IBOutlet weak var dateLabel: UILabel?
+    @IBOutlet weak var likeButton: UIButton?
+    @IBOutlet weak var gradientView: UIView?
     
     static let reusedIdentifier = "ImagesListCell"
     
     private var gradientLayer: CAGradientLayer?
     
     override func layoutSubviews() {
-            super.layoutSubviews()
-            
-            gradientLayer?.removeFromSuperlayer()
-            
-            let gradient = CAGradientLayer()
-            gradient.frame = gradientView.bounds
-            gradient.colors = [
-                UIColor(hex: "#1A1B22").withAlphaComponent(0.0).cgColor,
-                UIColor(hex: "#1A1B22").withAlphaComponent(1.0).cgColor
-            ]
-            gradient.startPoint = CGPoint(x: 0.5, y: 0.0)
-            gradient.endPoint = CGPoint(x: 0.5, y: 1.0)
-
-            gradientView.layer.insertSublayer(gradient, at: 0)
-            self.gradientLayer = gradient
-        }
+        super.layoutSubviews()
+        
+        gradientLayer?.removeFromSuperlayer()
+        
+        guard let gradientView = gradientView else { return }
+        
+        let gradient = CAGradientLayer()
+        gradient.frame = gradientView.bounds
+        gradient.colors = [
+            UIColor(hex: "#1A1B22").withAlphaComponent(0.0).cgColor,
+            UIColor(hex: "#1A1B22").withAlphaComponent(1.0).cgColor
+        ]
+        gradient.startPoint = CGPoint(x: 0.5, y: 0.0)
+        gradient.endPoint = CGPoint(x: 0.5, y: 1.0)
+        
+        gradientView.layer.insertSublayer(gradient, at: 0)
+        self.gradientLayer = gradient
+    }
 }
 
 extension UIColor {

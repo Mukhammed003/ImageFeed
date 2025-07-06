@@ -9,7 +9,7 @@ import UIKit
 
 final class ImagesListViewController: UIViewController {
 
-    @IBOutlet private var tableView: UITableView!
+    @IBOutlet private var tableView: UITableView?
     
     private let showSingleImageSegueIdentifier = "ShowSingleImage"
     private let photosName: [String] = Array(0..<20).map{ "\($0)" }
@@ -23,8 +23,8 @@ final class ImagesListViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        tableView.rowHeight = 200
-        tableView.contentInset = UIEdgeInsets(top: 12, left: 0, bottom: 12, right: 0)
+        tableView?.rowHeight = 200
+        tableView?.contentInset = UIEdgeInsets(top: 12, left: 0, bottom: 12, right: 0)
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -72,17 +72,17 @@ extension ImagesListViewController {
         let nameOfImage = photosName[indexPath.row]
         
         if let image = UIImage(named: nameOfImage) {
-            cell.imageOfPost.image = image
+            cell.imageOfPost?.image = image
         }
         else {
             return
         }
         
-        cell.dateLabel.text = dateFormatter.string(from: Date())
+        cell.dateLabel?.text = dateFormatter.string(from: Date())
         
         indexPath.row % 2 == 0
-        ? cell.likeButton.setImage(UIImage(named: "like_button_on"), for: .normal)
-        : cell.likeButton.setImage(UIImage(named: "like_button_off"), for: .normal)
+        ? cell.likeButton?.setImage(UIImage(resource: .likeButtonOn), for: .normal)
+        : cell.likeButton?.setImage(UIImage(resource: .likeButtonOff), for: .normal)
     }
 }
 
