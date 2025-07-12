@@ -74,11 +74,6 @@
 			path = ImageFeedUITests;
 			sourceTree = "<group>";
 		};
-		9280C6E92E225B5D008703C6 /* Image FeedTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "Image FeedTests";
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -131,7 +126,6 @@
 				921846702DD9C25A004C6B8A /* ImageFeed */,
 				921846872DD9C25B004C6B8A /* ImageFeedTests */,
 				921846912DD9C25B004C6B8A /* ImageFeedUITests */,
-				9280C6E92E225B5D008703C6 /* Image FeedTests */,
 				92078C092E1D806C00A3A0A1 /* Frameworks */,
 				9218466F2DD9C25A004C6B8A /* Products */,
 			);
@@ -234,9 +228,6 @@
 			);
 			dependencies = (
 				9280C6ED2E225B5D008703C6 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				9280C6E92E225B5D008703C6 /* Image FeedTests */,
 			);
 			name = "Image FeedTests";
 			packageProductDependencies = (
