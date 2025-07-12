@@ -11,7 +11,7 @@ final class ImagesListViewController: UIViewController {
 
     @IBOutlet private var tableView: UITableView?
     
-    private var imagesListService: ImagesListService?
+    private var imagesListService = ImagesListService.shared
     
     private let showSingleImageSegueIdentifier = "ShowSingleImage"
     private let photosName: [String] = Array(0..<20).map{ "\($0)" }
@@ -111,8 +111,8 @@ extension ImagesListViewController: UITableViewDelegate {
       willDisplay cell: UITableViewCell,
       forRowAt indexPath: IndexPath
     ) {
-        if indexPath.row + 1 == imagesListService?.photos.count {
-            imagesListService?.fetchPhotosNextPage()
+        if indexPath.row + 1 == imagesListService.photos.count {
+            imagesListService.fetchPhotosNextPage()
         }
     }
 }

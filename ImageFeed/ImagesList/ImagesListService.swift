@@ -10,12 +10,16 @@ import Foundation
 final class ImagesListService {
     
     static let didChangeNotification = Notification.Name(rawValue: "ImagesListServiceDidChange")
+    static let shared = ImagesListService()
     
+    private let storage = OAuth2TokenStorage.shared
     private let dateFormatter = ISO8601DateFormatter()
     private let urlSession = URLSession.shared
     private var task: URLSessionTask?
     private(set) var photos: [Photo] = []
     private var lastLoadedPage: Int?
+    
+    private init() {}
     
     func fetchPhotosNextPage() {
         let nextPage = (lastLoadedPage ?? 0) + 1
@@ -46,11 +50,6 @@ final class ImagesListService {
                 let photo = photoResult.map(self.convertToPhoto)
                 self.updatePhotoList(newPhotosList: photo)
                 print("[ImagesListService.fetchPhotosNextPage]: Success - Photos received")
-                NotificationCenter.default
-                    .post(
-                        name: ImagesListService.didChangeNotification,
-                        object: self,
-                        userInfo: ["photos": self.photos])
             case .failure(let error):
                 print("[ImagesListService.fetchPhotosNextPage]: Failure - \(error.localizedDescription)")
             }
@@ -68,6 +67,11 @@ final class ImagesListService {
         }
         
         var request = URLRequest(url: url)
+        guard let token = storage.token else {
+            print("[ProfileImageService.makeRequestForGettingUserImage]: Failure - no token available")
+            return nil
+        }
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.httpMethod = HTTPMethod.get.rawValue
         
         return request
@@ -83,12 +87,21 @@ final class ImagesListService {
             welcomeDescription: photoResult.description,
             thumbImageURL: photoResult.urls.thumb,
             largeImageURL: photoResult.urls.full,
-            isLiked: photoResult.likedByUser ?? false)
+            isLiked: photoResult.likedByUser)
     }
     
     private func updatePhotoList(newPhotosList: [Photo]) {
         DispatchQueue.main.async {
             self.photos.append(contentsOf: newPhotosList)
+            self.postPhotosChangedNotification()
         }
+    }
+    
+    private func postPhotosChangedNotification() {
+        NotificationCenter.default.post(
+            name: ImagesListService.didChangeNotification,
+            object: self,
+            userInfo: ["photos": self.photos]
+        )
     }
 }
