@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import ProgressHUD
 
 protocol AuthViewControllerDelegate: AnyObject {
     func didAuthenticate(_ vc: AuthViewController, didAuthenticateWithCode code: String)
@@ -13,19 +14,20 @@ protocol AuthViewControllerDelegate: AnyObject {
 
 final class AuthViewController: UIViewController {
     
-    @IBOutlet weak var LoginButton: UIButton!
+    @IBOutlet weak var loginButton: UIButton?
     
     let showWebViewSegueIdentifier = "ShowWebView"
     weak var delegate: AuthViewControllerDelegate?
     
     private let oauth2Service = OAuth2Service.shared
-    
+    private var alertPresenter: AlertPresenter?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         configureBackButton()
+        alertPresenter = AlertPresenter(viewController: self)
         
-        LoginButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 17)
+        loginButton?.titleLabel?.font = UIFont.boldSystemFont(ofSize: 17)
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -41,8 +43,8 @@ final class AuthViewController: UIViewController {
     }
     
     private func configureBackButton() {
-        navigationController?.navigationBar.backIndicatorImage = UIImage(named: "nav_back_button")
-        navigationController?.navigationBar.backIndicatorTransitionMaskImage = UIImage(named: "nav_back_button")
+        navigationController?.navigationBar.backIndicatorImage = UIImage(resource: .navBackButton)
+        navigationController?.navigationBar.backIndicatorTransitionMaskImage = UIImage(resource: .navBackButton)
         navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
         navigationItem.backBarButtonItem?.tintColor = UIColor(named: "YP Black")
     }
@@ -51,17 +53,29 @@ final class AuthViewController: UIViewController {
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
         navigationController?.popToViewController(self, animated: true)
+        UIBlockingProgressHUD.show()
         
         oauth2Service.fetchOAuthToken(code: code) { [weak self] result in
-            guard let self else { return }
-                    switch result {
-                    case .success(let token):
-                        print("✅ Авторизация прошла успешно, токен: \(token)")
-                        delegate?.didAuthenticate(self, didAuthenticateWithCode: code)
-                    case .failure(let error):
-                        print("❌ Ошибка при получении токена: \(error)")
-                    }
-                }
+            guard let self else {
+                UIBlockingProgressHUD.dismiss()
+                return
+            }
+            
+            UIBlockingProgressHUD.dismiss()
+            switch result {
+            case .success(let token):
+                print("✅ Авторизация прошла успешно, токен: \(token)")
+                delegate?.didAuthenticate(self, didAuthenticateWithCode: code)
+            case .failure(let error):
+                let alertModel = AlertModel(
+                    title: "Что-то пошло не так",
+                    message: "Не удалось войти в систему",
+                    buttonText: "Ок",
+                    completion: { })
+                alertPresenter?.showAlert(alert: alertModel)
+                print("❌ Ошибка при получении токена: \(error)")
+            }
+        }
     }
     
     func webViewViewControllerDidCancel(_ vc: WebViewViewController) {

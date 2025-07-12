@@ -10,24 +10,36 @@ final class SplashViewController: UIViewController {
     
     private let showAuthenticationScreenSegueIdentifier = "ShowAuthenticationScreen"
     
+    private let profileService = ProfileService.shared
     private let oAuth2Service = OAuth2Service()
-    private let storage = OAuth2TokenStorage()
+    private let storage = OAuth2TokenStorage.shared
+    
+    private var logoImage: UIImageView?
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        view.backgroundColor = .ypBlack
         
-        if storage.token != nil {
-            switchToTabBarController()
+        let logoImage = createUIImageView(nameOfImage: "splash_screen_logo", colorForBack: .ypBlack, radiusIfNeeded: 0)
+        
+        NSLayoutConstraint.activate([
+            logoImage.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            logoImage.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+        
+        if let token = storage.token {
+            fetchProfile(token)
         } else {
-            performSegue(withIdentifier: showAuthenticationScreenSegueIdentifier, sender: nil)
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            guard let viewController = storyboard.instantiateViewController(withIdentifier: "AuthViewController") as? AuthViewController else { return }
+            viewController.delegate = self
+            
+            let navigationController = UINavigationController(rootViewController: viewController)
+            navigationController.modalPresentationStyle = .fullScreen
+            present(navigationController, animated: true, completion: nil)
         }
         
-        for family in UIFont.familyNames {
-            print("Family: \(family)")
-            for name in UIFont.fontNames(forFamilyName: family) {
-                print("  Font: \(name)")
-            }
-        }
+        self.logoImage = logoImage
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -49,29 +61,32 @@ final class SplashViewController: UIViewController {
         window.rootViewController = tabBarController
     }
     
-}
-
-extension SplashViewController {
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+    private func createUIImageView(nameOfImage imageName: String, colorForBack backgroundColor: UIColor, radiusIfNeeded cornerRadius: CGFloat) -> UIImageView {
+        let exampleImage = UIImage(named: imageName)
+        let exampleImageView = UIImageView(image: exampleImage)
+        exampleImageView.backgroundColor = backgroundColor
+        exampleImageView.clipsToBounds = true
         
-        if segue.identifier == showAuthenticationScreenSegueIdentifier {
-            guard
-                let navigationController = segue.destination as? UINavigationController,
-                let viewController = navigationController.viewControllers[0] as? AuthViewController
-            else {
-                assertionFailure("Failed to prepare for \(showAuthenticationScreenSegueIdentifier)")
-                return
-            }
-            viewController.delegate = self
-        } else {
-            super.prepare(for: segue, sender: sender)
-           }
+        if cornerRadius != 0 {
+            exampleImageView.layer.cornerRadius = cornerRadius
+        }
+        
+        exampleImageView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(exampleImageView)
+        
+        return exampleImageView
     }
 }
 
 extension SplashViewController: AuthViewControllerDelegate {
     func didAuthenticate(_ vc: AuthViewController, didAuthenticateWithCode code: String) {
         dismiss(animated: true)
+        
+        guard let token = storage.token else {
+            return
+        }
+        
+        fetchProfile(token)
     }
     
     func fetchOAuthToken(_ code: String) {
@@ -85,5 +100,28 @@ extension SplashViewController: AuthViewControllerDelegate {
                     break
                 }
             }
+    }
+    
+    private func fetchProfile(_ token: String) {
+        UIBlockingProgressHUD.show()
+        profileService.fetchProfile(token) { [weak self] result in
+            
+            guard let self = self else {
+                UIBlockingProgressHUD.dismiss()
+                return
+            }
+            
+            UIBlockingProgressHUD.dismiss()
+            switch result {
+            case .success(let profile):
+                let username = profile.username
+                ProfileImageService.shared.fetchProfileImageURL(username: username) { _ in
+                }
+                self.switchToTabBarController()
+            case .failure:
+                // TODO [Sprint 11]
+                break
+            }
+        }
     }
 }

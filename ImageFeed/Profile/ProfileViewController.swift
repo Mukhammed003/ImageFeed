@@ -6,24 +6,31 @@
 //
 
 import UIKit
+import Kingfisher
 
 final class ProfileViewController: UIViewController {
     
-//    private var profileImage: UIImageView?
-//    private var emptyInFavouritesSectionImage: UIImageView?
-//    
-//    private var exitButton: UIButton?
-//    
-//    private var nameLabel: UILabel?
-//    private var emailLabel: UILabel?
-//    private var descriptonLabel: UILabel?
-//    private var favouritesLabel: UILabel?
+    private var profileImage: UIImageView?
+    private var emptyInFavouritesSectionImage: UIImageView?
+    private var exitButton: UIButton?
+    private var nameLabel: UILabel?
+    private var emailLabel: UILabel?
+    private var descriptionLabel: UILabel?
+    private var favouritesLabel: UILabel?
+    
+    private var profileImageServiceObserver: NSObjectProtocol?
+    
+    deinit {
+            if let observer = profileImageServiceObserver {
+                NotificationCenter.default.removeObserver(observer)
+            }
+        }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .ypBlack
         
-        let profileImage = createUIImageView(nameOfImage: "avatar", colorForBack: .ypBlack, radiusIfNeeded: 35)
+        let profileImage = createUIImageView(nameOfImage: "example_profile_avatar", colorForBack: .ypBlack, radiusIfNeeded: 35)
         let exitButton = createUIButton(imageForButton: "ipad.and.arrow.forward", forSelector: #selector(clickToExitButton), colorOfIcon: .ypRed)
         let nameLabel = createUILabel(textOfLabel: "Екатерина Новикова", letterSpacing: 0.3, colorOfLabel: .ypWhite, fontSizeOfLabel: 23, weightOfLabel: .bold)
         let emailLabel = createUILabel(textOfLabel: "@ekaterina_nov", letterSpacing: 0, colorOfLabel: .ypGray, fontSizeOfLabel: 13, weightOfLabel: .regular)
@@ -60,22 +67,40 @@ final class ProfileViewController: UIViewController {
             emptyInFavouritesSectionImage.topAnchor.constraint(equalTo: favouritesLabel.bottomAnchor, constant: 110)
             ])
         
-//        self.profileImage = profileImage
-//        self.exitButton = exitButton
-//        self.nameLabel = nameLabel
-//        self.emailLabel = emailLabel
-//        self.descriptonLabel = descriptionLabel
-//        self.favouritesLabel = favouritesLabel
-//        self.emptyInFavouritesSectionImage = emptyInFavouritesSectionImage
+        self.profileImage = profileImage
+        self.exitButton = exitButton
+        self.nameLabel = nameLabel
+        self.emailLabel = emailLabel
+        self.descriptionLabel = descriptionLabel
+        self.favouritesLabel = favouritesLabel
+        self.emptyInFavouritesSectionImage = emptyInFavouritesSectionImage
         
+        guard let profile = ProfileService.shared.profile else {
+            print("Ошибка при загрузке профиля")
+            return }
+        
+        updateProfileDetails(profile: profile)
+        
+        profileImageServiceObserver = NotificationCenter.default
+            .addObserver(
+                forName: ProfileImageService.didChangeNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                guard let self = self else { return }
+                self.updateAvatar()
+                }
+        
+        updateAvatar()
     }
     
     @objc func clickToExitButton() {}
     
-    func createUIImageView(nameOfImage imageName: String, colorForBack backgroundColor: UIColor, radiusIfNeeded cornerRadius: CGFloat) -> UIImageView {
+    private func createUIImageView(nameOfImage imageName: String, colorForBack backgroundColor: UIColor, radiusIfNeeded cornerRadius: CGFloat) -> UIImageView {
         let exampleImage = UIImage(named: imageName)
         let exampleImageView = UIImageView(image: exampleImage)
         exampleImageView.backgroundColor = backgroundColor
+        exampleImageView.clipsToBounds = true
         
         if cornerRadius != 0 {
             exampleImageView.layer.cornerRadius = cornerRadius
@@ -87,7 +112,7 @@ final class ProfileViewController: UIViewController {
         return exampleImageView
     }
     
-    func createUIButton(imageForButton systemName: String, forSelector selector: Selector, colorOfIcon tintColor: UIColor) -> UIButton {
+    private func createUIButton(imageForButton systemName: String, forSelector selector: Selector, colorOfIcon tintColor: UIColor) -> UIButton {
         guard let buttonImage = UIImage(systemName: systemName) else { return UIButton() }
         let exampleButton = UIButton.systemButton(with: buttonImage, target: self, action: selector)
         exampleButton.tintColor = tintColor
@@ -97,7 +122,7 @@ final class ProfileViewController: UIViewController {
         return exampleButton
     }
     
-    func createUILabel(textOfLabel exampleText: String, letterSpacing kern: CGFloat, colorOfLabel foregroundColor: UIColor, fontSizeOfLabel fontSize: CGFloat, weightOfLabel weight: UIFont.Weight) -> UILabel {
+    private func createUILabel(textOfLabel exampleText: String, letterSpacing kern: CGFloat, colorOfLabel foregroundColor: UIColor, fontSizeOfLabel fontSize: CGFloat, weightOfLabel weight: UIFont.Weight) -> UILabel {
         let exampleLabel = UILabel()
         exampleLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(exampleLabel)
@@ -113,5 +138,27 @@ final class ProfileViewController: UIViewController {
         exampleLabel.attributedText = attributedString
         
         return exampleLabel
+    }
+    
+    private func updateProfileDetails(profile: Profile) {
+        self.nameLabel?.text = profile.name
+        self.emailLabel?.text = profile.loginName
+        self.descriptionLabel?.text = profile.bio
+    }
+    
+    private func updateAvatar() {
+        guard
+            let profileImageURL = ProfileImageService.shared.avatarURL,
+            let url = URL(string: profileImageURL)
+            else {
+                print("❌ Невалидный URL: \(ProfileImageService.shared.avatarURL ?? "nil")")
+                return
+            }
+        
+        let processor = RoundCornerImageProcessor(cornerRadius: 64)
+        self.profileImage?.kf.indicatorType = .activity
+        self.profileImage?.kf.setImage(with: url,
+                                      placeholder: UIImage(named: "placeholder.jpeg"),
+                                      options: [.processor(processor)])
     }
 }
