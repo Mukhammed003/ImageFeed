@@ -28,10 +28,9 @@ final class ImagesListService {
         if task != nil || lastLoadedPage == nextPage {
             return
         }
-        lastLoadedPage = nextPage
         
         guard
-            let request = makeRequestForGettingListOfPhotos() else {
+            let request = makeRequestForGettingListOfPhotos(nextPage) else {
             print("[ImagesListService.fetchPhotosNextPage]: Failure - Request creation error")
             return
         }
@@ -42,11 +41,11 @@ final class ImagesListService {
             
             defer {
                 self.task = nil
-                self.lastLoadedPage = nil
             }
             
             switch result {
             case .success(let photoResult):
+                self.lastLoadedPage = nextPage
                 let photo = photoResult.map(self.convertToPhoto)
                 self.updatePhotoList(newPhotosList: photo)
                 print("[ImagesListService.fetchPhotosNextPage]: Success - Photos received")
@@ -58,9 +57,14 @@ final class ImagesListService {
         task.resume()
     }
     
-    private func makeRequestForGettingListOfPhotos() -> URLRequest? {
+    private func makeRequestForGettingListOfPhotos(_ page: Int) -> URLRequest? {
         var components = URLComponents()
         components.path = "/photos"
+        components.queryItems = [
+            URLQueryItem(name: "page", value: "\(page)"),
+            URLQueryItem(name: "per_page", value: "10"),
+            URLQueryItem(name: "order_by", value: "latest")
+        ]
         
         guard let baseURL = URL(string: "https://api.unsplash.com"), let url = components.url(relativeTo: baseURL) else {
             return nil
@@ -92,16 +96,25 @@ final class ImagesListService {
     
     private func updatePhotoList(newPhotosList: [Photo]) {
         DispatchQueue.main.async {
-            self.photos.append(contentsOf: newPhotosList)
+            let existingIDs = Set(self.photos.map { $0.id })
+            let uniquePhotos = newPhotosList.filter { !existingIDs.contains($0.id) }
+            
+            guard !uniquePhotos.isEmpty else {
+                print("⚠️ No unique photos to add")
+                return
+            }
+            
+            self.photos.append(contentsOf: uniquePhotos)
             self.postPhotosChangedNotification()
         }
     }
     
     private func postPhotosChangedNotification() {
-        NotificationCenter.default.post(
-            name: ImagesListService.didChangeNotification,
-            object: self,
-            userInfo: ["photos": self.photos]
-        )
+        NotificationCenter.default
+            .post(
+                name: ImagesListService.didChangeNotification,
+                object: self,
+                userInfo: ["photos": self.photos]
+            )
     }
 }

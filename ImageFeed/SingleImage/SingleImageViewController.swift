@@ -12,14 +12,7 @@ final class SingleImageViewController: UIViewController {
     @IBOutlet weak var imageView: UIImageView?
     @IBOutlet weak var scrollView: UIScrollView?
     
-    var image : UIImage? {
-        didSet {
-            guard isViewLoaded, let image else { return }
-            imageView?.image = image
-            imageView?.frame.size = image.size
-            rescaleAndCenterImageInScrollView(image: image)
-        }
-    }
+    var imageURL: URL?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,10 +20,21 @@ final class SingleImageViewController: UIViewController {
         scrollView?.minimumZoomScale = 0.1
         scrollView?.maximumZoomScale = 1.25
         
-        imageView?.image = image
-        guard let image = image else { return }
-        imageView?.frame.size = image.size
-        rescaleAndCenterImageInScrollView(image: image)
+        if let imageURL {
+                imageView?.kf.setImage(with: imageURL,
+                                       placeholder: UIImage(resource: .placeholderImageForPost),
+                                       completionHandler: { [weak self] result in
+                    guard let self else { return }
+                    switch result {
+                    case .success(let value):
+                        let image = value.image
+                        self.imageView?.frame.size = image.size
+                        self.rescaleAndCenterImageInScrollView(image: image)
+                    case .failure(let error):
+                        print("❌ Failed to load image: \(error)")
+                    }
+                })
+            }
     }
     
     
@@ -39,7 +43,7 @@ final class SingleImageViewController: UIViewController {
     }
     
     @IBAction func didTapShareButton(_ sender: Any) {
-        guard let image = image else { return }
+        guard let image = imageView?.image else { return }
         let activity = UIActivityViewController(activityItems: [image], applicationActivities: nil)
         present(activity, animated: true, completion: nil)
     }

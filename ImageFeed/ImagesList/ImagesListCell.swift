@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Kingfisher
 
 final class ImagesListCell: UITableViewCell {
     
@@ -36,6 +37,12 @@ final class ImagesListCell: UITableViewCell {
         
         gradientView.layer.insertSublayer(gradient, at: 0)
         self.gradientLayer = gradient
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        
+        self.imageOfPost?.kf.cancelDownloadTask()
     }
 }
 
