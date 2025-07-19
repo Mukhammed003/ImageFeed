@@ -8,16 +8,27 @@
 import UIKit
 import Kingfisher
 
+protocol ImagesListCellDelegate: AnyObject {
+    func imageListCellDidTapLike(_ cell: ImagesListCell)
+}
+
 final class ImagesListCell: UITableViewCell {
+    
+    var isLikingInProgress = false
     
     @IBOutlet weak var imageOfPost: UIImageView?
     @IBOutlet weak var dateLabel: UILabel?
     @IBOutlet weak var likeButton: UIButton?
     @IBOutlet weak var gradientView: UIView?
     
+    weak var delegate: ImagesListCellDelegate?
     static let reusedIdentifier = "ImagesListCell"
     
     private var gradientLayer: CAGradientLayer?
+    
+    @IBAction func likeButtonClicked(_ sender: Any) {
+        delegate?.imageListCellDidTapLike(self)
+    }
     
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -44,6 +55,13 @@ final class ImagesListCell: UITableViewCell {
         
         self.imageOfPost?.kf.cancelDownloadTask()
     }
+    
+    func setIsLiked(_ isLiked: Bool) {
+        isLiked
+        ? likeButton?.setImage(UIImage(resource: .likeButtonOn), for: .normal)
+        : likeButton?.setImage(UIImage(resource: .likeButtonOff), for: .normal)
+    }
+    
 }
 
 extension UIColor {

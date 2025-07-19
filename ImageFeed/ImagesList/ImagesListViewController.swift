@@ -57,7 +57,7 @@ final class ImagesListViewController: UIViewController {
                 return
                 }
             
-            if let url = URL(string: photos[indexPath.row].thumbImageURL)
+            if let url = URL(string: photos[indexPath.row].largeImageURL)
                {
                 viewontroller.imageURL = url
             }
@@ -103,12 +103,15 @@ extension ImagesListViewController: UITableViewDataSource {
 
 extension ImagesListViewController {
     private func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
-        let urlOfImagePost = photos[indexPath.row].thumbImageURL
+        
+        cell.delegate = self
+        
+        let urlOfImagePost = photos[indexPath.row].largeImageURL
         
         guard
             let url = URL(string: urlOfImagePost)
             else {
-            print("❌ Невалидный URL: \(photos[indexPath.row].thumbImageURL)")
+            print("❌ Невалидный URL: \(photos[indexPath.row].largeImageURL)")
                 return
             }
         
@@ -117,9 +120,7 @@ extension ImagesListViewController {
         cell.imageOfPost?.kf.setImage(with: url,
                                       placeholder: UIImage(resource: .placeholderImageForPost),
                                       options: [.processor(processor)],
-                                      completionHandler: {result in
-            self.tableView?.reloadRows(at: [indexPath], with: .automatic)
-        })
+                                      completionHandler: nil)
         
         guard let date = photos[indexPath.row].createdAt as Date? else { return }
         cell.dateLabel?.text = dateFormatter.string(from: date)
@@ -154,4 +155,46 @@ extension ImagesListViewController: UITableViewDelegate {
             imagesListService.fetchPhotosNextPage()
         }
     }
+}
+
+extension ImagesListViewController: ImagesListCellDelegate {
+    func imageListCellDidTapLike(_ cell: ImagesListCell) {
+            // Получаем indexPath ячейки
+            guard let indexPath = tableView?.indexPath(for: cell),
+                  indexPath.row < photos.count else { return }
+            
+            let photo = photos[indexPath.row]
+            let newLikeStatus = !photo.isLiked
+            
+            // Покажем лоадер
+            UIBlockingProgressHUD.show()
+            
+            imagesListService.changeLike(photoId: photo.id, isLike: newLikeStatus) { [weak self] result in
+                guard let self else { return }
+                
+                // Скрываем лоадер
+                UIBlockingProgressHUD.dismiss()
+                
+                switch result {
+                case .success:
+                    // Обновляем массив из сервиса
+                    self.photos = self.imagesListService.photos
+                    
+                    // Обновляем UI конкретной ячейки
+                    if let updatedCell = self.tableView?.cellForRow(at: indexPath) as? ImagesListCell {
+                        updatedCell.setIsLiked(self.photos[indexPath.row].isLiked)
+                    }
+
+                case .failure(let error):
+                    // Показываем UIAlertController с ошибкой
+                    let alert = UIAlertController(
+                        title: "Ошибка",
+                        message: "Не удалось изменить статус лайка.\n\(error.localizedDescription)",
+                        preferredStyle: .alert
+                    )
+                    alert.addAction(UIAlertAction(title: "ОК", style: .default))
+                    self.present(alert, animated: true)
+                }
+            }
+        }
 }

@@ -16,25 +16,11 @@ final class SingleImageViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-    
+        
         scrollView?.minimumZoomScale = 0.1
         scrollView?.maximumZoomScale = 1.25
         
-        if let imageURL {
-                imageView?.kf.setImage(with: imageURL,
-                                       placeholder: UIImage(resource: .placeholderImageForPost),
-                                       completionHandler: { [weak self] result in
-                    guard let self else { return }
-                    switch result {
-                    case .success(let value):
-                        let image = value.image
-                        self.imageView?.frame.size = image.size
-                        self.rescaleAndCenterImageInScrollView(image: image)
-                    case .failure(let error):
-                        print("❌ Failed to load image: \(error)")
-                    }
-                })
-            }
+        loadImage()
     }
     
     
@@ -77,6 +63,40 @@ final class SingleImageViewController: UIViewController {
         let x = (newContentSize.width - visibleRectSize.width) / 2
         let y = (newContentSize.height - visibleRectSize.height) / 2
         scrollView.setContentOffset(CGPoint(x: x, y: y), animated: false)
+    }
+    
+    private func showError() {
+        let alert = UIAlertController(
+            title: "Что-то пошло не так",
+            message: "Попробовать ещё раз?",
+            preferredStyle: .alert
+        )
+        
+        alert.addAction(UIAlertAction(title: "Не надо", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Повторить", style: .default) { [weak self] _ in
+            self?.loadImage()
+        })
+        
+        present(alert, animated: true)
+    }
+    
+    private func loadImage() {
+        guard let imageURL else { return }
+            
+            UIBlockingProgressHUD.show()
+            imageView?.kf.setImage(with: imageURL,
+                                   placeholder: UIImage(resource: .placeholderImageForPost),
+                                   completionHandler: { [weak self] result in
+                guard let self else { return }
+                UIBlockingProgressHUD.dismiss()
+                
+                switch result {
+                case .success(let imageResult):
+                    self.rescaleAndCenterImageInScrollView(image: imageResult.image)
+                case .failure:
+                    self.showError()
+                }
+            })
     }
 }
 
