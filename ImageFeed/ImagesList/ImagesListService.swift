@@ -57,6 +57,10 @@ final class ImagesListService {
         task.resume()
     }
     
+    func clearPhotos() {
+        self.photos = []
+    }
+    
     private func makeRequestForGettingListOfPhotos(_ page: Int) -> URLRequest? {
         var components = URLComponents()
         components.path = "/photos"

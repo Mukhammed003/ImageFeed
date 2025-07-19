@@ -19,6 +19,7 @@ final class ProfileViewController: UIViewController {
     private var favouritesLabel: UILabel?
     
     private var profileImageServiceObserver: NSObjectProtocol?
+    private var profileLogoutService = ProfileLogoutService.shared
     
     deinit {
             if let observer = profileImageServiceObserver {
@@ -32,6 +33,7 @@ final class ProfileViewController: UIViewController {
         
         let profileImage = createUIImageView(nameOfImage: "example_profile_avatar", colorForBack: .ypBlack, radiusIfNeeded: 35)
         let exitButton = createUIButton(imageForButton: "ipad.and.arrow.forward", forSelector: #selector(clickToExitButton), colorOfIcon: .ypRed)
+        view.addSubview(exitButton)
         let nameLabel = createUILabel(textOfLabel: "Екатерина Новикова", letterSpacing: 0.3, colorOfLabel: .ypWhite, fontSizeOfLabel: 23, weightOfLabel: .bold)
         let emailLabel = createUILabel(textOfLabel: "@ekaterina_nov", letterSpacing: 0, colorOfLabel: .ypGray, fontSizeOfLabel: 13, weightOfLabel: .regular)
         let descriptionLabel = createUILabel(textOfLabel: "Hello, world!", letterSpacing: 0, colorOfLabel: .ypWhite, fontSizeOfLabel: 13, weightOfLabel: .regular)
@@ -94,7 +96,17 @@ final class ProfileViewController: UIViewController {
         updateAvatar()
     }
     
-    @objc func clickToExitButton() {}
+    @objc func clickToExitButton() {
+        let alertModel = AlertModel(
+            title: "Выйти из профиля?",
+            message: "Вы уверены, что хотите выйти?",
+            buttonText: "Да") {
+                self.profileLogoutService.logout()
+            }
+        
+        let alertPresenter = AlertPresenter(viewController: self)
+        alertPresenter.showAlert(alert: alertModel)
+    }
     
     private func createUIImageView(nameOfImage imageName: String, colorForBack backgroundColor: UIColor, radiusIfNeeded cornerRadius: CGFloat) -> UIImageView {
         let exampleImage = UIImage(named: imageName)
@@ -117,7 +129,6 @@ final class ProfileViewController: UIViewController {
         let exampleButton = UIButton.systemButton(with: buttonImage, target: self, action: selector)
         exampleButton.tintColor = tintColor
         exampleButton.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(exampleButton)
         
         return exampleButton
     }

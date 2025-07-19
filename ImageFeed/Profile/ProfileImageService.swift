@@ -83,6 +83,10 @@ final class ProfileImageService {
             task.resume()
         }
     
+    func removeAvatarURL() {
+        self.avatarURL = nil
+    }
+    
     private func makeRequestForGettingUserImage(userName: String) -> URLRequest? {
         var components = URLComponents()
         components.path = "/users/\(userName)"

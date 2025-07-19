@@ -71,6 +71,10 @@ final class ProfileService {
             task.resume()
         }
     
+    func clearProfile() {
+        self.profile = nil
+    }
+    
     private func makeRequestForGettingUserData(bearerToken: String) -> URLRequest? {
         var components = URLComponents()
         components.path = "/me"
