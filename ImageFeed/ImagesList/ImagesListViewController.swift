@@ -57,7 +57,7 @@ final class ImagesListViewController: UIViewController {
                 return
                 }
             
-            if let url = URL(string: photos[indexPath.row].largeImageURL)
+            if let url = URL(string: photos[indexPath.row].thumbImageURL)
                {
                 viewontroller.imageURL = url
             }
@@ -106,12 +106,12 @@ extension ImagesListViewController {
         
         cell.delegate = self
         
-        let urlOfImagePost = photos[indexPath.row].largeImageURL
+        let urlOfImagePost = photos[indexPath.row].thumbImageURL
         
         guard
             let url = URL(string: urlOfImagePost)
             else {
-            print("❌ Невалидный URL: \(photos[indexPath.row].largeImageURL)")
+            print("❌ Невалидный URL: \(photos[indexPath.row].thumbImageURL)")
                 return
             }
         
