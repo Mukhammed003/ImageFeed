@@ -18,12 +18,7 @@ final class ImagesListViewController: UIViewController {
     private var profileImageServiceObserver: NSObjectProtocol?
     
     private let showSingleImageSegueIdentifier = "ShowSingleImage"
-    private lazy var dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .long
-        formatter.timeStyle = .none
-        return formatter
-    }()
+    private lazy var dateFormatter = AppDateFormatters.photoListFormatter
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -122,8 +117,8 @@ extension ImagesListViewController {
                                       options: [.processor(processor)],
                                       completionHandler: nil)
         
-        guard let date = photos[indexPath.row].createdAt as Date? else { return }
-        cell.dateLabel?.text = dateFormatter.string(from: date)
+        let date = photos[indexPath.row].createdAt
+        cell.dateLabel?.text = date.map { dateFormatter.string(from: $0) } ?? ""
         
         photos[indexPath.row].isLiked
         ? cell.likeButton?.setImage(UIImage(resource: .likeButtonOn), for: .normal)
@@ -159,34 +154,28 @@ extension ImagesListViewController: UITableViewDelegate {
 
 extension ImagesListViewController: ImagesListCellDelegate {
     func imageListCellDidTapLike(_ cell: ImagesListCell) {
-            // Получаем indexPath ячейки
             guard let indexPath = tableView?.indexPath(for: cell),
                   indexPath.row < photos.count else { return }
             
             let photo = photos[indexPath.row]
             let newLikeStatus = !photo.isLiked
             
-            // Покажем лоадер
             UIBlockingProgressHUD.show()
             
             imagesListService.changeLike(photoId: photo.id, isLike: newLikeStatus) { [weak self] result in
                 guard let self else { return }
                 
-                // Скрываем лоадер
                 UIBlockingProgressHUD.dismiss()
                 
                 switch result {
                 case .success:
-                    // Обновляем массив из сервиса
                     self.photos = self.imagesListService.photos
                     
-                    // Обновляем UI конкретной ячейки
                     if let updatedCell = self.tableView?.cellForRow(at: indexPath) as? ImagesListCell {
                         updatedCell.setIsLiked(self.photos[indexPath.row].isLiked)
                     }
 
                 case .failure(let error):
-                    // Показываем UIAlertController с ошибкой
                     let alert = UIAlertController(
                         title: "Ошибка",
                         message: "Не удалось изменить статус лайка.\n\(error.localizedDescription)",

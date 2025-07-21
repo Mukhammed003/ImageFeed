@@ -21,3 +21,17 @@ enum HTTPMethod: String {
     case put = "PUT"
     case delete = "DELETE"
 }
+
+enum AppDateFormatters {
+    static let photoListFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .long
+        formatter.timeStyle = .none
+        return formatter
+    }()
+
+    static let iso8601: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        return formatter
+    }()
+}

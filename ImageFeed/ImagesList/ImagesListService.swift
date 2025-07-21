@@ -13,7 +13,7 @@ final class ImagesListService {
     static let shared = ImagesListService()
     
     private let storage = OAuth2TokenStorage.shared
-    private let dateFormatter = ISO8601DateFormatter()
+    private let dateFormatter = AppDateFormatters.iso8601
     private let urlSession = URLSession.shared
     private var task: URLSessionTask?
     private(set) var photos: [Photo] = []
@@ -155,6 +155,7 @@ final class ImagesListService {
                     guard let httpResponse = response as? HTTPURLResponse,
                           (200...299).contains(httpResponse.statusCode) else {
                         DispatchQueue.main.async {
+                            print("[ImagesListService.changeLike]: Failure - status code is not in 2xx range")
                             completion(.failure(NetworkError.httpStatusCode((response as? HTTPURLResponse)?.statusCode ?? -1)))
                         }
                         return
