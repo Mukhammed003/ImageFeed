@@ -10,15 +10,16 @@ import Kingfisher
 
 final class ProfileViewController: UIViewController {
     
-    private var profileImage: UIImageView?
-    private var emptyInFavouritesSectionImage: UIImageView?
-    private var exitButton: UIButton?
-    private var nameLabel: UILabel?
-    private var emailLabel: UILabel?
-    private var descriptionLabel: UILabel?
-    private var favouritesLabel: UILabel?
+    private lazy var profileImage: UIImageView = makeProfileImage()
+    private lazy var emptyInFavouritesSectionImage: UIImageView = makeEmptyInFavouritesSectionImage()
+    private lazy var exitButton: UIButton = makeExitButton()
+    private lazy var nameLabel: UILabel = makeNameLabel()
+    private lazy var emailLabel: UILabel = makeEmailLabel()
+    private lazy var descriptionLabel: UILabel = makeDescriptionLabel()
+    private lazy var favouritesLabel: UILabel = makeFavouritesLabel()
     
     private var profileImageServiceObserver: NSObjectProtocol?
+    private var profileLogoutService = ProfileLogoutService.shared
     
     deinit {
             if let observer = profileImageServiceObserver {
@@ -30,14 +31,31 @@ final class ProfileViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .ypBlack
         
-        let profileImage = createUIImageView(nameOfImage: "example_profile_avatar", colorForBack: .ypBlack, radiusIfNeeded: 35)
-        let exitButton = createUIButton(imageForButton: "ipad.and.arrow.forward", forSelector: #selector(clickToExitButton), colorOfIcon: .ypRed)
-        let nameLabel = createUILabel(textOfLabel: "Екатерина Новикова", letterSpacing: 0.3, colorOfLabel: .ypWhite, fontSizeOfLabel: 23, weightOfLabel: .bold)
-        let emailLabel = createUILabel(textOfLabel: "@ekaterina_nov", letterSpacing: 0, colorOfLabel: .ypGray, fontSizeOfLabel: 13, weightOfLabel: .regular)
-        let descriptionLabel = createUILabel(textOfLabel: "Hello, world!", letterSpacing: 0, colorOfLabel: .ypWhite, fontSizeOfLabel: 13, weightOfLabel: .regular)
-        let favouritesLabel = createUILabel(textOfLabel: "Избранное", letterSpacing: 0.3, colorOfLabel: .ypWhite, fontSizeOfLabel: 23, weightOfLabel: .bold)
-        let emptyInFavouritesSectionImage = createUIImageView(nameOfImage: "no_photo_in_favourites", colorForBack: .ypBlack, radiusIfNeeded: 0)
+        addSubviews()
+        setupConstraints()
+        setupNotifications()
+        updateUI()
+    }
+    
+    @objc func clickToExitButton() {
+        let alertModel = AlertModel(
+            title: "Выйти из профиля?",
+            message: "Вы уверены, что хотите выйти?",
+            buttonText: "Да") {
+                self.profileLogoutService.logout()
+            }
         
+        let alertPresenter = AlertPresenter(viewController: self)
+        alertPresenter.showAlert(alert: alertModel)
+    }
+    
+    private func addSubviews() {
+        [profileImage, exitButton, nameLabel, emailLabel, descriptionLabel, favouritesLabel, emptyInFavouritesSectionImage].forEach {
+                view.addSubview($0)
+            }
+    }
+    
+    private func setupConstraints() {
         NSLayoutConstraint.activate([
             profileImage.heightAnchor.constraint(equalToConstant: 70),
             profileImage.widthAnchor.constraint(equalToConstant: 70),
@@ -66,35 +84,65 @@ final class ProfileViewController: UIViewController {
             emptyInFavouritesSectionImage.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             emptyInFavouritesSectionImage.topAnchor.constraint(equalTo: favouritesLabel.bottomAnchor, constant: 110)
             ])
-        
-        self.profileImage = profileImage
-        self.exitButton = exitButton
-        self.nameLabel = nameLabel
-        self.emailLabel = emailLabel
-        self.descriptionLabel = descriptionLabel
-        self.favouritesLabel = favouritesLabel
-        self.emptyInFavouritesSectionImage = emptyInFavouritesSectionImage
-        
+    }
+    
+    private func setupNotifications() {
+        profileImageServiceObserver = NotificationCenter.default
+                .addObserver(forName: ProfileImageService.didChangeNotification, object: nil, queue: .main) { [weak self] _ in
+                    self?.updateAvatar()
+                }
+    }
+    
+    private func updateUI() {
         guard let profile = ProfileService.shared.profile else {
             print("Ошибка при загрузке профиля")
-            return }
-        
+            return
+        }
         updateProfileDetails(profile: profile)
-        
-        profileImageServiceObserver = NotificationCenter.default
-            .addObserver(
-                forName: ProfileImageService.didChangeNotification,
-                object: nil,
-                queue: .main
-            ) { [weak self] _ in
-                guard let self = self else { return }
-                self.updateAvatar()
-                }
-        
         updateAvatar()
     }
     
-    @objc func clickToExitButton() {}
+    private func makeProfileImage() -> UIImageView {
+        let profileImage = createUIImageView(nameOfImage: "example_profile_avatar", colorForBack: .ypBlack, radiusIfNeeded: 35)
+        
+        return profileImage
+    }
+    
+    private func makeEmptyInFavouritesSectionImage() -> UIImageView {
+        let emptyInFavouritesSectionImage = createUIImageView(nameOfImage: "no_photo_in_favourites", colorForBack: .ypBlack, radiusIfNeeded: 0)
+        
+        return emptyInFavouritesSectionImage
+    }
+    
+    private func makeExitButton() -> UIButton {
+        let exitButton = createUIButton(imageForButton: "ipad.and.arrow.forward", forSelector: #selector(clickToExitButton), colorOfIcon: .ypRed)
+        
+        return exitButton
+    }
+    
+    private func makeNameLabel() -> UILabel {
+        let nameLabel = createUILabel(textOfLabel: "Екатерина Новикова", letterSpacing: 0.3, colorOfLabel: .ypWhite, fontSizeOfLabel: 23, weightOfLabel: .bold)
+        
+        return nameLabel
+    }
+    
+    private func makeEmailLabel() -> UILabel {
+        let emailLabel = createUILabel(textOfLabel: "@ekaterina_nov", letterSpacing: 0, colorOfLabel: .ypGray, fontSizeOfLabel: 13, weightOfLabel: .regular)
+        
+        return emailLabel
+    }
+    
+    private func makeDescriptionLabel() -> UILabel {
+        let descriptionLabel = createUILabel(textOfLabel: "Hello, world!", letterSpacing: 0, colorOfLabel: .ypWhite, fontSizeOfLabel: 13, weightOfLabel: .regular)
+        
+        return descriptionLabel
+    }
+    
+    private func makeFavouritesLabel() -> UILabel {
+        let favouritesLabel = createUILabel(textOfLabel: "Избранное", letterSpacing: 0.3, colorOfLabel: .ypWhite, fontSizeOfLabel: 23, weightOfLabel: .bold)
+        
+        return favouritesLabel
+    }
     
     private func createUIImageView(nameOfImage imageName: String, colorForBack backgroundColor: UIColor, radiusIfNeeded cornerRadius: CGFloat) -> UIImageView {
         let exampleImage = UIImage(named: imageName)
@@ -107,7 +155,6 @@ final class ProfileViewController: UIViewController {
         }
         
         exampleImageView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(exampleImageView)
         
         return exampleImageView
     }
@@ -116,17 +163,17 @@ final class ProfileViewController: UIViewController {
         guard let buttonImage = UIImage(systemName: systemName) else { return UIButton() }
         let exampleButton = UIButton.systemButton(with: buttonImage, target: self, action: selector)
         exampleButton.tintColor = tintColor
+        
         exampleButton.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(exampleButton)
         
         return exampleButton
     }
     
     private func createUILabel(textOfLabel exampleText: String, letterSpacing kern: CGFloat, colorOfLabel foregroundColor: UIColor, fontSizeOfLabel fontSize: CGFloat, weightOfLabel weight: UIFont.Weight) -> UILabel {
         let exampleLabel = UILabel()
+        
         exampleLabel.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(exampleLabel)
-        let exampleText = exampleText
+        
         let attributedString = NSAttributedString(
             string: exampleText,
             attributes: [
@@ -141,9 +188,9 @@ final class ProfileViewController: UIViewController {
     }
     
     private func updateProfileDetails(profile: Profile) {
-        self.nameLabel?.text = profile.name
-        self.emailLabel?.text = profile.loginName
-        self.descriptionLabel?.text = profile.bio
+        self.nameLabel.text = profile.name
+        self.emailLabel.text = profile.loginName
+        self.descriptionLabel.text = profile.bio
     }
     
     private func updateAvatar() {
@@ -156,8 +203,8 @@ final class ProfileViewController: UIViewController {
             }
         
         let processor = RoundCornerImageProcessor(cornerRadius: 64)
-        self.profileImage?.kf.indicatorType = .activity
-        self.profileImage?.kf.setImage(with: url,
+        self.profileImage.kf.indicatorType = .activity
+        self.profileImage.kf.setImage(with: url,
                                       placeholder: UIImage(named: "placeholder.jpeg"),
                                       options: [.processor(processor)])
     }

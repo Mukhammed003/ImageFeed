@@ -71,6 +71,10 @@ final class ProfileService {
             task.resume()
         }
     
+    func clearProfile() {
+        self.profile = nil
+    }
+    
     private func makeRequestForGettingUserData(bearerToken: String) -> URLRequest? {
         var components = URLComponents()
         components.path = "/me"
@@ -89,7 +93,7 @@ final class ProfileService {
     private func convertToProfile(profileResult: ProfileResult) -> Profile {
         return Profile(
             username: profileResult.username,
-            name: "\(profileResult.firstName) \(profileResult.lastName)",
+            name: "\(profileResult.firstName) \(profileResult.lastName ?? "")",
             loginName: "@\(profileResult.username)",
             bio: profileResult.bio ?? "Нет описания")
     }

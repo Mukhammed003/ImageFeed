@@ -12,25 +12,15 @@ final class SingleImageViewController: UIViewController {
     @IBOutlet weak var imageView: UIImageView?
     @IBOutlet weak var scrollView: UIScrollView?
     
-    var image : UIImage? {
-        didSet {
-            guard isViewLoaded, let image else { return }
-            imageView?.image = image
-            imageView?.frame.size = image.size
-            rescaleAndCenterImageInScrollView(image: image)
-        }
-    }
+    var imageURL: URL?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-    
+        
         scrollView?.minimumZoomScale = 0.1
         scrollView?.maximumZoomScale = 1.25
         
-        imageView?.image = image
-        guard let image = image else { return }
-        imageView?.frame.size = image.size
-        rescaleAndCenterImageInScrollView(image: image)
+        loadImage()
     }
     
     
@@ -39,7 +29,7 @@ final class SingleImageViewController: UIViewController {
     }
     
     @IBAction func didTapShareButton(_ sender: Any) {
-        guard let image = image else { return }
+        guard let image = imageView?.image else { return }
         let activity = UIActivityViewController(activityItems: [image], applicationActivities: nil)
         present(activity, animated: true, completion: nil)
     }
@@ -73,6 +63,40 @@ final class SingleImageViewController: UIViewController {
         let x = (newContentSize.width - visibleRectSize.width) / 2
         let y = (newContentSize.height - visibleRectSize.height) / 2
         scrollView.setContentOffset(CGPoint(x: x, y: y), animated: false)
+    }
+    
+    private func showError() {
+        let alert = UIAlertController(
+            title: "Что-то пошло не так",
+            message: "Попробовать ещё раз?",
+            preferredStyle: .alert
+        )
+        
+        alert.addAction(UIAlertAction(title: "Не надо", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Повторить", style: .default) { [weak self] _ in
+            self?.loadImage()
+        })
+        
+        present(alert, animated: true)
+    }
+    
+    private func loadImage() {
+        guard let imageURL else { return }
+            
+            UIBlockingProgressHUD.show()
+            imageView?.kf.setImage(with: imageURL,
+                                   placeholder: UIImage(resource: .placeholderImageForPost),
+                                   completionHandler: { [weak self] result in
+                guard let self else { return }
+                UIBlockingProgressHUD.dismiss()
+                
+                switch result {
+                case .success(let imageResult):
+                    self.rescaleAndCenterImageInScrollView(image: imageResult.image)
+                case .failure:
+                    self.showError()
+                }
+            })
     }
 }
 

@@ -57,6 +57,9 @@
                                                     </constraints>
                                                     <state key="normal" title="Button"/>
                                                     <buttonConfiguration key="configuration" style="plain" image="like_button_on" title=""/>
+                                                    <connections>
+                                                        <action selector="likeButtonClicked:" destination="gq7-bf-yZJ" eventType="touchUpInside" id="t6k-ei-ICA"/>
+                                                    </connections>
                                                 </button>
                                             </subviews>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

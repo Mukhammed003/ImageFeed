@@ -25,6 +25,7 @@ final class AuthViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureBackButton()
+        
         alertPresenter = AlertPresenter(viewController: self)
         
         loginButton?.titleLabel?.font = UIFont.boldSystemFont(ofSize: 17)
