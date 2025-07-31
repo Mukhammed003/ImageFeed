@@ -8,7 +8,16 @@
 import UIKit
 import Kingfisher
 
-final class ProfileViewController: UIViewController {
+protocol ProfileViewControllerProtocol: AnyObject {
+    var presenter: ProfilePresenterProtocol? { get set }
+    
+    func updateProfileDetails(name: String, login: String, bio: String)
+    func updateAvatar(with url: URL)
+}
+
+final class ProfileViewController: UIViewController, ProfileViewControllerProtocol {
+    
+    var presenter: ProfilePresenterProtocol?
     
     private lazy var profileImage: UIImageView = makeProfileImage()
     private lazy var emptyInFavouritesSectionImage: UIImageView = makeEmptyInFavouritesSectionImage()
@@ -19,7 +28,6 @@ final class ProfileViewController: UIViewController {
     private lazy var favouritesLabel: UILabel = makeFavouritesLabel()
     
     private var profileImageServiceObserver: NSObjectProtocol?
-    private var profileLogoutService = ProfileLogoutService.shared
     
     deinit {
             if let observer = profileImageServiceObserver {
@@ -29,12 +37,28 @@ final class ProfileViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        print("Presenter is: \(String(describing: presenter))") 
+        
         view.backgroundColor = .ypBlack
         
         addSubviews()
         setupConstraints()
         setupNotifications()
-        updateUI()
+        presenter?.viewDidLoad()
+    }
+    
+    func updateProfileDetails(name: String, login: String, bio: String) {
+        nameLabel.text = name
+        emailLabel.text = login
+        descriptionLabel.text = bio
+    }
+    
+    func updateAvatar(with url: URL) {
+        let processor = RoundCornerImageProcessor(cornerRadius: 64)
+                profileImage.kf.indicatorType = .activity
+                profileImage.kf.setImage(with: url,
+                                         placeholder: UIImage(named: "placeholder.jpeg"),
+                                         options: [.processor(processor)])
     }
     
     @objc func clickToExitButton() {
@@ -42,7 +66,7 @@ final class ProfileViewController: UIViewController {
             title: "Выйти из профиля?",
             message: "Вы уверены, что хотите выйти?",
             buttonText: "Да") {
-                self.profileLogoutService.logout()
+                self.presenter?.didTapLogout()
             }
         
         let alertPresenter = AlertPresenter(viewController: self)
@@ -89,17 +113,8 @@ final class ProfileViewController: UIViewController {
     private func setupNotifications() {
         profileImageServiceObserver = NotificationCenter.default
                 .addObserver(forName: ProfileImageService.didChangeNotification, object: nil, queue: .main) { [weak self] _ in
-                    self?.updateAvatar()
+                    self?.presenter?.avatarDidChange()
                 }
-    }
-    
-    private func updateUI() {
-        guard let profile = ProfileService.shared.profile else {
-            print("Ошибка при загрузке профиля")
-            return
-        }
-        updateProfileDetails(profile: profile)
-        updateAvatar()
     }
     
     private func makeProfileImage() -> UIImageView {
@@ -185,27 +200,5 @@ final class ProfileViewController: UIViewController {
         exampleLabel.attributedText = attributedString
         
         return exampleLabel
-    }
-    
-    private func updateProfileDetails(profile: Profile) {
-        self.nameLabel.text = profile.name
-        self.emailLabel.text = profile.loginName
-        self.descriptionLabel.text = profile.bio
-    }
-    
-    private func updateAvatar() {
-        guard
-            let profileImageURL = ProfileImageService.shared.avatarURL,
-            let url = URL(string: profileImageURL)
-            else {
-                print("❌ Невалидный URL: \(ProfileImageService.shared.avatarURL ?? "nil")")
-                return
-            }
-        
-        let processor = RoundCornerImageProcessor(cornerRadius: 64)
-        self.profileImage.kf.indicatorType = .activity
-        self.profileImage.kf.setImage(with: url,
-                                      placeholder: UIImage(named: "placeholder.jpeg"),
-                                      options: [.processor(processor)])
     }
 }
