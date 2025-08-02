@@ -77,7 +77,7 @@ extension AuthViewController: WebViewViewControllerDelegate {
                     message: "Не удалось войти в систему",
                     buttonText: "Ок",
                     completion: { })
-                alertPresenter?.showAlert(alert: alertModel)
+                alertPresenter?.showAlert(alert: alertModel, accessibilityIdentifier: "Nothing")
                 print("❌ Ошибка при получении токена: \(error)")
             }
         }

@@ -70,7 +70,7 @@ final class ProfileViewController: UIViewController, ProfileViewControllerProtoc
             }
         
         let alertPresenter = AlertPresenter(viewController: self)
-        alertPresenter.showAlert(alert: alertModel)
+        alertPresenter.showAlert(alert: alertModel, accessibilityIdentifier: "byeALert")
     }
     
     private func addSubviews() {
@@ -131,6 +131,8 @@ final class ProfileViewController: UIViewController, ProfileViewControllerProtoc
     
     private func makeExitButton() -> UIButton {
         let exitButton = createUIButton(imageForButton: "ipad.and.arrow.forward", forSelector: #selector(clickToExitButton), colorOfIcon: .ypRed)
+        
+        exitButton.accessibilityIdentifier = "exitButton"
         
         return exitButton
     }
