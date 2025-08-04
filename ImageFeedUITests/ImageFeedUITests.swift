@@ -23,7 +23,7 @@ final class ImageFeedUITests: XCTestCase {
     func testAuth() throws {
         app.buttons["Authenticate"].tap()
         
-        let webView = app.webViews["UnsplashWebView"]
+        let webView = app.webViews[AccessibilityIdentifiers.webView.rawValue]
         XCTAssertTrue(webView.waitForExistence(timeout: 5))
         
         let loginTextField = webView.textFields.element(boundBy: 0)
@@ -62,11 +62,11 @@ final class ImageFeedUITests: XCTestCase {
         
         sleep(2)
         
-        cellToLike.buttons["likeButtonOff"].tap()
+        cellToLike.buttons[AccessibilityIdentifiers.likeButtonOff.rawValue].tap()
         
         sleep(2)
         
-        cellToLike.buttons["likeButtonOn"].tap()
+        cellToLike.buttons[AccessibilityIdentifiers.likeButtonOn.rawValue].tap()
         
         sleep(2)
         
@@ -89,8 +89,8 @@ final class ImageFeedUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts[""].exists)
         XCTAssertTrue(app.staticTexts[""].exists)
         
-        app.buttons["exitButton"].tap()
+        app.buttons[AccessibilityIdentifiers.exitButton.rawValue].tap()
         
-        app.alerts["byeALert"].scrollViews.otherElements.buttons["Да"].tap()
+        app.alerts[AccessibilityIdentifiers.logoutAlert.rawValue].scrollViews.otherElements.buttons["Да"].tap()
     }
 }

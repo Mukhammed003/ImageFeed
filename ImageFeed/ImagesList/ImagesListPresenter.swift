@@ -5,7 +5,6 @@
 //  Created by Muhammed Nurmukhanov on 01.08.2025.
 //
 
-import Foundation
 import Kingfisher
 import UIKit
 
@@ -21,12 +20,12 @@ protocol ImagesListPresenterProtocol {
     func didTapLike(at index: Int)
 }
 
-final class ImagesListPresenter: ImagesListPresenterProtocol {
+final class ImagesListPresenter: @preconcurrency ImagesListPresenterProtocol {
     weak var view: ImagesListViewProtocol?
     private var imagesListService = ImagesListService.shared
     private let dateFormatter = AppDateFormatters.photoListFormatter
 
-    internal(set) var photos: [Photo] = []
+    var photos: [Photo] = []
 
     var photosCount: Int {
         photos.count
@@ -48,7 +47,7 @@ final class ImagesListPresenter: ImagesListPresenterProtocol {
     }
 
     func photo(at index: Int) -> Photo {
-        return photos[index]
+        photos[index]
     }
 
     func sizeForPhoto(at index: Int) -> CGSize {
@@ -79,7 +78,10 @@ final class ImagesListPresenter: ImagesListPresenterProtocol {
         UIBlockingProgressHUD.show()
 
         imagesListService.changeLike(photoId: photo.id, isLike: newLikeStatus) { [weak self] result in
-            guard let self = self else { return }
+            guard let self = self else {
+                UIBlockingProgressHUD.dismiss()
+                return
+            }
 
             UIBlockingProgressHUD.dismiss()
 

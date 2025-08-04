@@ -34,15 +34,15 @@ final class WebViewViewController: UIViewController, WebViewViewControllerProtoc
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        webView?.accessibilityIdentifier = "UnsplashWebView"
+        webView?.accessibilityIdentifier = AccessibilityIdentifiers.webView.rawValue
         
         estimatedProgressObservation = webView?.observe(
             \.estimatedProgress,
             options: [],
              changeHandler: {[weak self] _, _ in
                  guard let self,
-                       let estimatedProgess = webView?.estimatedProgress else { return }
-                 presenter?.didUpdateProgressValue(estimatedProgess)
+                       let estimatedProgress = webView?.estimatedProgress else { return }
+                 presenter?.didUpdateProgressValue(estimatedProgress)
              })
         
         webView?.navigationDelegate = self

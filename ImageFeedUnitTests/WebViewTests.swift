@@ -80,7 +80,7 @@ final class WebViewTests: XCTestCase {
         ]
         
         guard let url = urlComponents.url else { return }
-        let result = authHelper.code(from: url)
+        let result = authHelper.getCode(from: url)
         
         XCTAssertEqual("test code", result)
     }
