@@ -20,7 +20,7 @@ final class ProfileImageService {
     private let urlSession = URLSession.shared
     private var task: URLSessionTask?
     private var lastUsername: String?
-    internal(set) var avatarURL: String?
+    var avatarURL: String?
     
     private init() {}
     

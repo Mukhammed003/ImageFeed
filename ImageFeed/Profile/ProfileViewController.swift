@@ -61,7 +61,7 @@ final class ProfileViewController: UIViewController, ProfileViewControllerProtoc
                                          options: [.processor(processor)])
     }
     
-    @objc func clickToExitButton() {
+    @objc private func clickToExitButton() {
         let alertModel = AlertModel(
             title: "Выйти из профиля?",
             message: "Вы уверены, что хотите выйти?",
@@ -70,7 +70,7 @@ final class ProfileViewController: UIViewController, ProfileViewControllerProtoc
             }
         
         let alertPresenter = AlertPresenter(viewController: self)
-        alertPresenter.showAlert(alert: alertModel, accessibilityIdentifier: "byeALert")
+        alertPresenter.showAlert(alert: alertModel, accessibilityIdentifier: AccessibilityIdentifiers.logoutAlert.rawValue)
     }
     
     private func addSubviews() {
@@ -132,7 +132,7 @@ final class ProfileViewController: UIViewController, ProfileViewControllerProtoc
     private func makeExitButton() -> UIButton {
         let exitButton = createUIButton(imageForButton: "ipad.and.arrow.forward", forSelector: #selector(clickToExitButton), colorOfIcon: .ypRed)
         
-        exitButton.accessibilityIdentifier = "exitButton"
+        exitButton.accessibilityIdentifier = AccessibilityIdentifiers.exitButton.rawValue
         
         return exitButton
     }

@@ -27,3 +27,11 @@ enum AppDateFormatters {
         return formatter
     }()
 }
+
+enum AccessibilityIdentifiers: String {
+    case webView = "UnsplashWebView"
+    case likeButtonOn = "likeButtonOn"
+    case likeButtonOff = "likeButtonOff"
+    case logoutAlert = "byeALert"
+    case exitButton = "exitButton"
+}
