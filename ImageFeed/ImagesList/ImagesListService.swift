@@ -10,6 +10,7 @@ import Foundation
 final class ImagesListService {
     
     static let didChangeNotification = Notification.Name(rawValue: "ImagesListServiceDidChange")
+    
     static let shared = ImagesListService()
     
     private let storage = OAuth2TokenStorage.shared

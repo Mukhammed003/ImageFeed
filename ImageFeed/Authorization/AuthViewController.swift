@@ -37,6 +37,10 @@ final class AuthViewController: UIViewController {
                 print("Something get wrong when prepare for segue: \(showWebViewSegueIdentifier)")
                 return
             }
+            let authHelper = AuthHelper()
+            let webViewPresenter = WebViewPresenter(authHelper: authHelper)
+            webViewViewController.presenter = webViewPresenter
+            webViewPresenter.view = webViewViewController
             webViewViewController.delegate = self
         } else {
             super.prepare(for: segue, sender: sender)
@@ -73,7 +77,7 @@ extension AuthViewController: WebViewViewControllerDelegate {
                     message: "Не удалось войти в систему",
                     buttonText: "Ок",
                     completion: { })
-                alertPresenter?.showAlert(alert: alertModel)
+                alertPresenter?.showAlert(alert: alertModel, accessibilityIdentifier: "Nothing")
                 print("❌ Ошибка при получении токена: \(error)")
             }
         }
